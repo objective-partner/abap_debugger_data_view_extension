@@ -10,8 +10,10 @@ CLASS ltc_debug_data_view_table_enh DEFINITION FOR TESTING
 
     METHODS: setup.
     METHODS: teardown.
-    METHODS: display_tab_4_aunit FOR TESTING,
-      check_4_correct_wrap FOR TESTING.
+    METHODS:
+      display_tab_4_aunit FOR TESTING,
+      check_4_correct_wrap FOR TESTING,
+      check_4_negative_numbers FOR TESTING.
 ENDCLASS.       "ltcl_aunit_debugger_table_enh
 
 
@@ -28,6 +30,48 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD check_4_negative_numbers.
+    TYPES: BEGIN OF negative_num_type,
+             price TYPE s_price,
+           END OF negative_num_type.
+
+    DATA:
+      lv_wrap_from_here TYPE                   i VALUE 255,
+      ls_fieldcat       TYPE                   lvc_s_fcat,
+      lt_fieldcatalog   TYPE                   lvc_t_fcat,
+      lt_negative_num   TYPE STANDARD TABLE OF negative_num_type,
+      lr_tabledescr     TYPE REF TO cl_abap_structdescr.
+
+    lt_negative_num = VALUE #( ( price = -100 )
+                               ( price = -99 )
+                               ( price = -1 )
+                               ( price = 0 )
+                               ( price = 1 )
+                               ( price = 99 )
+                               ( price = 100 ) ).
+
+    lr_tabledescr  ?= cl_abap_structdescr=>describe_by_data(  lt_negative_num[ 1 ] ).
+*    lr_tabledescr->get_table_line_type( ).
+    DATA(lt_dfies) = cl_salv_data_descr=>read_structdescr(  lr_tabledescr  ).
+
+    LOOP AT lt_dfies  INTO DATA(ls_dfies).
+
+      CLEAR ls_fieldcat.
+      MOVE-CORRESPONDING ls_dfies TO ls_fieldcat.
+      ls_fieldcat-seltext = ls_dfies-fieldname.
+      APPEND ls_fieldcat TO lt_fieldcatalog.
+
+    ENDLOOP.
+
+    lv_wrap_from_here = 170.
+
+    DATA(lv_output) = lo_aunit_debugger_table_enh->prepare_output(
+                        it_table          = lt_negative_num
+                        iv_table_title    = 'LT_NUMBERS'
+                        it_fieldcatalog   = lt_fieldcatalog
+                        iv_wrap_from_here = lv_wrap_from_here ).
+
+  ENDMETHOD.
   METHOD check_4_correct_wrap.
     DATA:
       lv_wrap_from_here TYPE                   i VALUE 255,
@@ -147,7 +191,7 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
         it_fieldcatalog = it_fieldcatalog
         iv_wrap_from_here  = lv_wrap_from_here ).
 
-    lv_output_exp = |LT_SFLIGHT = VALUE #(\n  (    CARRID = 'AA'\t\n   CONNID = '0017'\t\n   FLDATE = '20170208'\t\n   PRICE = '422.94'\t )\n\n) |.
+    lv_output_exp = |LT_SFLIGHT = VALUE #(\n  (    CARRID = 'AA'\t\n   CONNID = '0017'\t\n   FLDATE = '20170208'\t\n   PRICE = '422.94'\t )\n\n). |.
 
     cl_abap_unit_assert=>assert_equals(
       EXPORTING

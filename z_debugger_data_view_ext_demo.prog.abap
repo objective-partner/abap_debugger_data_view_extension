@@ -6,20 +6,22 @@
 REPORT z_debugger_data_view_ext_demo.
 
 DATA:
-      lt_sflight type STANDARD TABLE OF sflight,
-      ls_sflight type sflight.
+  lt_flights TYPE STANDARD TABLE OF sflight WITH EMPTY KEY,
+  ls_flight  TYPE sflight.
 
 "for testing table enhancement
-  SELECT *
-    FROM sflight
-     INTO TABLE lt_sflight
-  WHERE carrid = 'AA'.
+SELECT * UP TO 5 ROWS
+  FROM sflight
+   INTO TABLE lt_flights
+     WHERE carrid = 'AA'.
 
-cl_demo_output=>display( lt_sflight ).
+lt_flights[ 1 ]-price = -10.
+
+cl_demo_output=>display( lt_flights ).
 
 "for testing structure enhancement
 SELECT SINGLE *
-    from sflight
-      into ls_sflight.
+    FROM sflight
+      INTO ls_flight.
 
- cl_demo_output=>display( ls_sflight ).
+cl_demo_output=>display( ls_flight ).

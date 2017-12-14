@@ -20,19 +20,33 @@ CLASS zcl_debug_data_view_table_enh DEFINITION
           !iv_table_title  TYPE string .
   PRIVATE SECTION.
 
-    METHODS prepare_output
-      IMPORTING
-        !it_fieldcatalog      TYPE lvc_t_fcat
-        !it_table             TYPE ANY TABLE
-        !iv_wrap_from_here    TYPE i OPTIONAL
-        !iv_table_title       TYPE string
-      RETURNING
-        VALUE(rv_string_main) TYPE string .
+    METHODS:
+      prepare_output
+        IMPORTING
+          !it_fieldcatalog      TYPE lvc_t_fcat
+          !it_table             TYPE ANY TABLE
+          !iv_wrap_from_here    TYPE i OPTIONAL
+          !iv_table_title       TYPE string
+        RETURNING
+          VALUE(rv_string_main) TYPE string,
+      get_next_value
+        IMPORTING is_field_info       TYPE lvc_s_fcat
+                  iv_field_value      TYPE any
+        RETURNING VALUE(rv_new_value) TYPE string.
+
 ENDCLASS.
 
 
 
 CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
+
+
+  METHOD  get_next_value.
+    DATA(lv_value_as_string) = CONV string( iv_field_value ).
+    DATA(lv_width) = strlen( lv_value_as_string  ).
+
+    rv_new_value = |{ is_field_info-seltext } = '{ iv_field_value ALPHA = IN  WIDTH = lv_width }|.
+  ENDMETHOD.
 
 
   METHOD handle_toolbar_set.
@@ -70,7 +84,7 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
         CHECK <v_field> IS ASSIGNED AND
               <v_field> IS NOT INITIAL AND
               ls_field_info-seltext NE |INDEX|.
-        DATA(lv_temp_string) = |{ lv_string_line } { ls_field_info-seltext } = '{ <v_field> ALPHA = IN WIDTH = ls_field_info-outputlen }'|. "add column and value like -> MAND = '100'
+        DATA(lv_temp_string) = |{ lv_string_line } { get_next_value( is_field_info = ls_field_info  iv_field_value = <v_field> ) }'|. "add column and value like -> MAND = '100'
         DATA(lv_temp_string_length) =  strlen( lv_temp_string ).
 
         IF lv_temp_string_length > lv_wrap_from_here.
@@ -78,16 +92,15 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
           rv_string_main = |{ rv_string_main }  { lv_string_line }\n|. "* wrap line here
           CLEAR: lv_string_line.
         ENDIF.
-        lv_string_line = |{ lv_string_line } { ls_field_info-seltext } = '{ <v_field> }'\t|.
+        lv_string_line = |{ lv_string_line } { get_next_value( is_field_info = ls_field_info  iv_field_value = <v_field> ) }'\t|.
       ENDLOOP.
       IF lv_string_line NE space.
-
-        rv_string_main = |{ rv_string_main }  { lv_string_line } )\n|. "* Umbruch bei neuer Zeile der Itab
+        rv_string_main = |{ rv_string_main }  { lv_string_line } )\n|. "* wrap line on each new added itab line
       ENDIF.
       CLEAR: lv_string_line.
     ENDLOOP.
 
-    rv_string_main = |{ rv_string_main }\n) |.
+    rv_string_main = |{ rv_string_main }\n). |.
   ENDMETHOD.
 
 
@@ -100,7 +113,7 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
           it_table        = it_table
           iv_table_title = iv_table_title
           ).
-
+    cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>display( lv_string_main ).
 
 

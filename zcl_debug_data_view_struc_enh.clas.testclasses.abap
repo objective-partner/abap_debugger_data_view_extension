@@ -20,8 +20,8 @@ CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
       rv_content_expected TYPE string.
 
     rv_content_expected = |IS_STRUCTURE = VALUE #(    MANDT = '100'\t   CARRID = 'AA'\t   CONNID = '0017'\t   FLDATE = '20141217'\t   PRICE = '422.94'\t   CURRENCY = 'USD'|
-                          && |   PLANETYPE = '747-400'\t   SEATSMAX = '385'| &&
-                          |   SEATSOCC = '372'\t   PAYMENTSUM = '192437.84'\t   SEATSMAX_B = '31'\t    SEATSOCC_B = '28'\t   SEATSMAX_F = '21'\t   SEATSOCC_F = '21' )|.
+                          && |\t   PLANETYPE = '747-400'\t   SEATSMAX = '385'| &&
+                          |\t   SEATSOCC = '372'\t   PAYMENTSUM = '192437.84'\t   SEATSMAX_B = '31'\t   SEATSOCC_B = '28'\t   SEATSMAX_F = '21'\t   SEATSOCC_F = '21'\t ).|.
 
     it_struc_data = VALUE #(
   (    nr = '1'       component = 'MANDT'       varvalue = '100'       varvalhex = '310030003000'       vartype = 'C(3)'       varabstypename = '\TYPE=S_MANDT'       action1 = '@0Z\QFeldinhalt ändern@'
@@ -57,7 +57,7 @@ CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
 
     rv_content = zcl_debug_data_view_struc_enh=>prepare_output(
         it_struc_data = it_struc_data
-       iv_wrap_from_here = 170
+        iv_wrap_from_here = 170
         iv_struc_name = |IS_STRUCTURE| ).
 
 

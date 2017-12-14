@@ -60,7 +60,7 @@ CLASS ZCL_DEBUG_DATA_VIEW_STRUC_ENH IMPLEMENTATION.
       CLEAR: lv_string_line.
     ENDLOOP.
 
-    rv_content = |{ rv_content } ) |.
+    rv_content = |{ rv_content } ).|.
   ENDMETHOD.
 
 
@@ -69,6 +69,7 @@ CLASS ZCL_DEBUG_DATA_VIEW_STRUC_ENH IMPLEMENTATION.
     lv_string_main  = prepare_output( iv_struc_name = iv_struc_name
                                       it_struc_data = it_struc_data ).
 
-    cl_demo_output=>display( lv_string_main ).
+   cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
+   cl_demo_output=>display( lv_string_main ).
   ENDMETHOD.
 ENDCLASS.
