@@ -5,20 +5,19 @@ CLASS zcl_debug_data_view_table_enh DEFINITION
 
   PUBLIC SECTION.
 
-    "code addition for ALV pushbuttons
-    "for placing custom buttons
     METHODS:
       handle_toolbar_set
             FOR EVENT toolbar OF cl_gui_alv_grid
         IMPORTING
-            !e_object
-            !e_interactive,
+            e_object
+            e_interactive,
       show_popup_w_content
         IMPORTING
-          !it_table        TYPE ANY TABLE
-          !it_fieldcatalog TYPE lvc_t_fcat
-          !iv_table_title  TYPE string .
+          it_table        TYPE ANY TABLE
+          it_fieldcatalog TYPE lvc_t_fcat
+          iv_table_title  TYPE string .
   PRIVATE SECTION.
+    DATA m_times_called TYPE i.
 
     METHODS:
       prepare_output
@@ -50,8 +49,12 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
 
 
   METHOD handle_toolbar_set.
+    CHECK m_times_called < 2.
+
     APPEND VALUE stb_button( function = 'ZDATA_4_ABAP_VIEW'  butn_type = 0 text = 'Data for ABAP View' ) TO e_object->mt_toolbar.
-  ENDMETHOD.                    "handle_toolbar_set
+
+    m_times_called = m_times_called + 1.
+  ENDMETHOD.                   "handle_toolbar_set
 
 
   METHOD prepare_output.
