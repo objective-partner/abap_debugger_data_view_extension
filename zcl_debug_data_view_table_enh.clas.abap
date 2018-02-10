@@ -27,7 +27,7 @@ CLASS zcl_debug_data_view_table_enh DEFINITION
           !iv_wrap_from_here    TYPE i OPTIONAL
           !iv_table_title       TYPE string
         RETURNING
-          VALUE(rv_string_main) TYPE string,
+          VALUE(rv_content_4_display) TYPE string,
       get_next_value
         IMPORTING is_field_info       TYPE lvc_s_fcat
                   iv_field_value      TYPE any
@@ -78,9 +78,9 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
     ENDIF.
     lv_possible_wrap_min_length = lv_wrap_from_here.
 
-    rv_string_main = |{ iv_table_title } = VALUE #(\n|.
+    rv_content_4_display = |{ iv_table_title } = VALUE #(\n|.
     LOOP AT it_table ASSIGNING <s_tab_line>.
-      rv_string_main = |{ rv_string_main }  ( |.
+      rv_content_4_display = |{ rv_content_4_display }  ( |.
       "* print columns
       LOOP AT it_fieldcatalog INTO DATA(ls_field_info).
         ASSIGN COMPONENT ls_field_info-fieldname OF STRUCTURE <s_tab_line> TO FIELD-SYMBOL(<v_field>).
@@ -92,34 +92,31 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
 
         IF lv_temp_string_length > lv_wrap_from_here.
           " new column value combination does not fit and must be placed in a new line
-          rv_string_main = |{ rv_string_main }  { lv_string_line }\n|. "* wrap line here
+          rv_content_4_display = |{ rv_content_4_display }  { lv_string_line }\n|. "wrap line here
           CLEAR: lv_string_line.
         ENDIF.
         lv_string_line = |{ lv_string_line } { get_next_value( is_field_info = ls_field_info  iv_field_value = <v_field> ) }'\t|.
       ENDLOOP.
       IF lv_string_line NE space.
-        rv_string_main = |{ rv_string_main }  { lv_string_line } )\n|. "* wrap line on each new added itab line
+        rv_content_4_display = |{ rv_content_4_display }  { lv_string_line } )\n|. "* wrap line on each new added itab line
       ENDIF.
       CLEAR: lv_string_line.
     ENDLOOP.
 
-    rv_string_main = |{ rv_string_main }\n). |.
+    rv_content_4_display = |{ rv_content_4_display }\n). |.
   ENDMETHOD.
 
 
   METHOD show_popup_w_content.
 
-    DATA lv_string_main TYPE string.
+    DATA lv_content_4_display TYPE string.
 
-    lv_string_main = prepare_output(
-          it_fieldcatalog = it_fieldcatalog
-          it_table        = it_table
-          iv_table_title = iv_table_title
-          ).
+    lv_content_4_display = prepare_output( it_fieldcatalog = it_fieldcatalog
+                                           it_table        = it_table
+                                           iv_table_title = iv_table_title
+                                         ).
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
-    cl_demo_output=>display( lv_string_main ).
-
-
+    cl_demo_output=>display( lv_content_4_display ).
 
   ENDMETHOD.
 ENDCLASS.

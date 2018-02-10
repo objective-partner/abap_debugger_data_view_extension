@@ -51,16 +51,14 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
                                ( price = 100 ) ).
 
     lr_tabledescr  ?= cl_abap_structdescr=>describe_by_data(  lt_negative_num[ 1 ] ).
-*    lr_tabledescr->get_table_line_type( ).
+
     DATA(lt_dfies) = cl_salv_data_descr=>read_structdescr(  lr_tabledescr  ).
 
     LOOP AT lt_dfies  INTO DATA(ls_dfies).
-
       CLEAR ls_fieldcat.
       MOVE-CORRESPONDING ls_dfies TO ls_fieldcat.
       ls_fieldcat-seltext = ls_dfies-fieldname.
       APPEND ls_fieldcat TO lt_fieldcatalog.
-
     ENDLOOP.
 
     lv_wrap_from_here = 170.
@@ -74,18 +72,25 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
   ENDMETHOD.
   METHOD check_4_correct_wrap.
     DATA:
-      lv_wrap_from_here TYPE                   i VALUE 255,
-      ls_fieldcat       TYPE                   lvc_s_fcat,
-      lt_fieldcatalog   TYPE                   lvc_t_fcat,
-      lr_tabdescr       TYPE REF TO            cl_abap_structdescr,
-      lr_data           TYPE REF TO            data,
-      lv_output         TYPE                   string,
-      lt_outputlist     TYPE TABLE OF          string,
-      lv_correct_length TYPE                   abap_bool VALUE abap_true,
-      lv_output_length  TYPE                   i,
-      lt_dfies          TYPE                   ddfields,
-      ls_dfies          TYPE                   dfies,
-      lt_sflight        TYPE STANDARD TABLE OF sflight.
+      lv_wrap_from_here            TYPE                   i VALUE 255,
+      ls_fieldcat                  TYPE                   lvc_s_fcat,
+      lt_fieldcatalog              TYPE                   lvc_t_fcat,
+      lr_tabdescr                  TYPE REF TO            cl_abap_structdescr,
+      lr_data                      TYPE REF TO            data,
+      lv_output                    TYPE                   string,
+      lt_outputlist                TYPE TABLE OF          string,
+      lv_predifined_wrap_respected TYPE                   abap_bool VALUE abap_true,
+      lv_output_length             TYPE                   i,
+      lt_dfies                     TYPE                   ddfields,
+      ls_dfies                     TYPE                   dfies,
+      lt_sflight                   TYPE STANDARD TABLE OF sflight.
+
+
+    SELECT SINGLE @abap_true
+      FROM sflight
+          INTO  @DATA(lv_sflight_filled).
+
+    CHECK lv_sflight_filled EQ abap_true.
 
     SELECT *
        FROM sflight
@@ -122,13 +127,13 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
     LOOP AT lt_outputlist INTO DATA(ls_output_elem).
       lv_output_length = strlen( ls_output_elem ).
       IF lv_output_length > lv_wrap_from_here.
-        lv_correct_length = abap_false.
+        lv_predifined_wrap_respected = abap_false.
       ENDIF.
     ENDLOOP.
 
     cl_abap_unit_assert=>assert_true(
       EXPORTING
-        act              = lv_correct_length    " Actual value
+        act              = lv_predifined_wrap_respected    " Actual value
         msg              = |Die Länge einer oder mehrerer Zeilen überschreitet die vorgegebene Länge.|    " Description
     ).
 
@@ -143,19 +148,19 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
              fldate TYPE s_date,
              price  TYPE s_price,
            END OF ty_sflight_mini.
-    DATA: ls_fieldcat       TYPE                   lvc_s_fcat,
-          it_fieldcatalog   TYPE                   lvc_t_fcat,
-          lr_tabdescr       TYPE REF TO            cl_abap_structdescr,
-          lr_data           TYPE REF TO            data,
-          lt_dfies          TYPE                   ddfields,
-          ls_dfies          TYPE                   dfies,
-          lv_output         TYPE                   string,
-          lt_outputlist     TYPE TABLE OF          string,
-          lv_output_exp     TYPE                   string,
-          lv_wrap_from_here TYPE                   i VALUE 255,
-          lv_output_length  TYPE                   i,
-          lv_correct_length TYPE                   abap_bool VALUE abap_true,
-          lt_sflight        TYPE STANDARD TABLE OF ty_sflight_mini.
+    DATA: ls_fieldcat                  TYPE                   lvc_s_fcat,
+          it_fieldcatalog              TYPE                   lvc_t_fcat,
+          lr_tabdescr                  TYPE REF TO            cl_abap_structdescr,
+          lr_data                      TYPE REF TO            data,
+          lt_dfies                     TYPE                   ddfields,
+          ls_dfies                     TYPE                   dfies,
+          lv_output                    TYPE                   string,
+          lt_outputlist                TYPE TABLE OF          string,
+          lv_output_exp                TYPE                   string,
+          lv_wrap_from_here            TYPE                   i VALUE 255,
+          lv_output_length             TYPE                   i,
+          lv_predifined_wrap_respected TYPE                   abap_bool VALUE abap_true,
+          lt_sflight                   TYPE STANDARD TABLE OF ty_sflight_mini.
 
     SELECT carrid connid
            fldate price
@@ -205,13 +210,13 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
     LOOP AT lt_outputlist INTO DATA(ls_output_elem).
       lv_output_length = strlen( ls_output_elem ).
       IF lv_output_length > lv_wrap_from_here.
-        lv_correct_length = abap_false.
+        lv_predifined_wrap_respected = abap_false.
       ENDIF.
     ENDLOOP.
 
     cl_abap_unit_assert=>assert_true(
       EXPORTING
-        act              = lv_correct_length    " Actual value
+        act              = lv_predifined_wrap_respected    " Actual value
         msg              = |Die Länge einer oder mehrerer Zeilen überschreitet die vorgegebene Länge.|    " Description
     ).
 

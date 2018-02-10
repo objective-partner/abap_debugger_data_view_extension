@@ -4,13 +4,13 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION LOCAL FRIENDS ltc_debug_data_view
 CLASS ltc_debug_data_view_struc_enh DEFINITION FOR TESTING DURATION SHORT  RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
-    METHODS: prepare_output FOR TESTING.
+    METHODS: check_4_correct_output FOR TESTING.
 ENDCLASS.       "ltc_aunit_debugger_struc_enh
 
 
 CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
 
-  METHOD prepare_output.
+  METHOD check_4_correct_output.
 
     DATA:
       it_struc_data       TYPE tpda_struc_view_it,
