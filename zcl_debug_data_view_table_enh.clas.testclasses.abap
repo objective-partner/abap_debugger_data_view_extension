@@ -11,9 +11,11 @@ CLASS ltc_debug_data_view_table_enh DEFINITION FOR TESTING
     METHODS: setup.
     METHODS: teardown.
     METHODS:
-      display_tab_4_aunit FOR TESTING,
+      "!check of
+      prepare_ouput_w_1_line_itab FOR TESTING,
       check_4_correct_wrap FOR TESTING,
-      check_4_negative_numbers FOR TESTING.
+      "!check for
+      correct_negative_numbers_value FOR TESTING.
 ENDCLASS.       "ltcl_aunit_debugger_table_enh
 
 
@@ -21,25 +23,25 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
 
 
   METHOD setup.
-    CREATE OBJECT lo_aunit_debugger_table_enh.
+    lo_aunit_debugger_table_enh = NEW zcl_debug_data_view_table_enh( ).
   ENDMETHOD.
 
 
   METHOD teardown.
-    CLEAR: lo_aunit_debugger_table_enh.
+    CLEAR lo_aunit_debugger_table_enh.
   ENDMETHOD.
 
 
-  METHOD check_4_negative_numbers.
+  METHOD correct_negative_numbers_value.
     TYPES: BEGIN OF negative_num_type,
              price TYPE s_price,
-           END OF negative_num_type.
+           END OF   negative_num_type.
 
     DATA:
       lv_wrap_from_here TYPE                   i VALUE 255,
       ls_fieldcat       TYPE                   lvc_s_fcat,
       lt_fieldcatalog   TYPE                   lvc_t_fcat,
-      lt_negative_num   TYPE STANDARD TABLE OF negative_num_type,
+      lt_negative_num   TYPE STANDARD TABLE OF negative_num_type WITH EMPTY KEY,
       lr_tabledescr     TYPE REF TO cl_abap_structdescr.
 
     lt_negative_num = VALUE #( ( price = -100 )
@@ -86,16 +88,63 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
       lt_sflight                   TYPE STANDARD TABLE OF sflight.
 
 
-    SELECT SINGLE @abap_true
-      FROM sflight
-          INTO  @DATA(lv_sflight_filled).
+    lt_sflight = VALUE #(
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20170810'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '373 '
+       paymentsum = '191448.29 '     seatsmax_b = '31 '  seatsocc_b = '31 '  seatsmax_f = '21 '  seatsocc_f = '19 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20170911'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '372 '
+       paymentsum = '192949.65 '     seatsmax_b = '31 '  seatsocc_b = '30 '  seatsmax_f = '21 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20171013'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '374 '
+       paymentsum = '193761.65 '     seatsmax_b = '31 '  seatsocc_b = '29 '  seatsmax_f = '21 '  seatsocc_f = '21 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20171114'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '369 '
+       paymentsum = '191634.32 '     seatsmax_b = '31 '  seatsocc_b = '30 '  seatsmax_f = '21 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20171216'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '373 '
+       paymentsum = '194387.65 '     seatsmax_b = '31 '  seatsocc_b = '31 '  seatsmax_f = '21 '  seatsocc_f = '21 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180117'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '373 '
+       paymentsum = '192471.82 '     seatsmax_b = '31 '  seatsocc_b = '30 '  seatsmax_f = '21 '  seatsocc_f = '19 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180218'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '364 '
+       paymentsum = '189764.88 '     seatsmax_b = '31 '  seatsocc_b = '30 '  seatsmax_f = '21 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180322'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '371 '
+       paymentsum = '191854.22 '     seatsmax_b = '31 '  seatsocc_b = '29 '  seatsmax_f = '21 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180423'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '67 '
+       paymentsum = '35696.14 '  seatsmax_b = '31 '  seatsocc_b = '6 '   seatsmax_f = '21 '  seatsocc_f = '4 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180525'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '161 '
+       paymentsum = '82701.75 '  seatsmax_b = '31 '  seatsocc_b = '12 '  seatsmax_f = '21 '  seatsocc_f = '9 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180626'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '55 '
+       paymentsum = '29068.70 '  seatsmax_b = '31 '  seatsocc_b = '5 '   seatsmax_f = '21 '  seatsocc_f = '3 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180728'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '81 '
+       paymentsum = '42446.28 '  seatsmax_b = '31 '  seatsocc_b = '6 '   seatsmax_f = '21 '  seatsocc_f = '5 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0017'     fldate = '20180829'     price = '422.94 '   currency = 'USD'    planetype = '747-400'   seatsmax = '385 '   seatsocc = '26 '
+       paymentsum = '11482.83 '  seatsmax_b = '31 '  seatsocc_b = '2 '   seatsmax_f = '21 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20170812'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '316 '
+       paymentsum = '169307.25 '     seatsmax_b = '30 '  seatsocc_b = '30 '  seatsmax_f = '20 '  seatsocc_f = '18 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20170913'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '319 '
+       paymentsum = '170990.57 '     seatsmax_b = '30 '  seatsocc_b = '30 '  seatsmax_f = '20 '  seatsocc_f = '19 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20171015'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '312 '
+       paymentsum = '167898.89 '     seatsmax_b = '30 '  seatsocc_b = '28 '  seatsmax_f = '20 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20171116'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '321 '
+       paymentsum = '170888.98 '     seatsmax_b = '30 '  seatsocc_b = '29 '  seatsmax_f = '20 '  seatsocc_f = '19 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20171218'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '319 '
+       paymentsum = '171003.34 '     seatsmax_b = '30 '  seatsocc_b = '30 '  seatsmax_f = '20 '  seatsocc_f = '19 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180119'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '311 '
+       paymentsum = '165691.17 '     seatsmax_b = '30 '  seatsocc_b = '28 '  seatsmax_f = '20 '  seatsocc_f = '19 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180220'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '321 '
+       paymentsum = '171967.61 '     seatsmax_b = '30 '  seatsocc_b = '28 '  seatsmax_f = '20 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180324'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '319 '
+       paymentsum = '171324.64 '     seatsmax_b = '30 '  seatsocc_b = '29 '  seatsmax_f = '20 '  seatsocc_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180425'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '148 '
+       paymentsum = '78878.40 '  seatsmax_b = '30 '  seatsocc_b = '13 '  seatsmax_f = '20 '  seatsocc_f = '9 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180527'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '109 '
+       paymentsum = '58061.32 '  seatsmax_b = '30 '  seatsocc_b = '10 '  seatsmax_f = '20 '  seatsocc_f = '7 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180628'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '116 '
+       paymentsum = '61317.93 '  seatsmax_b = '30 '  seatsocc_b = '11 '  seatsmax_f = '20 '  seatsocc_f = '6 '   )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180730'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsocc = '8 '
+       paymentsum = '3848.76 '   seatsmax_b = '30 '  seatsocc_b = '1 '   seatsmax_f = '20 '  )
+      (    mandt = '001'     carrid = 'AA'   connid = '0064'     fldate = '20180831'     price = '422.94 '   currency = 'USD'    planetype = 'A340-600'  seatsmax = '330 '   seatsmax_b = '30 '
+       seatsmax_f = '20 '    )
 
-    CHECK lv_sflight_filled EQ abap_true.
+    ).
 
-    SELECT *
-       FROM sflight
-         INTO TABLE lt_sflight
-           WHERE carrid = 'AA'.
+
 
     CREATE DATA lr_data LIKE LINE OF lt_sflight.
 
@@ -103,8 +152,7 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
 
     lt_dfies = cl_salv_data_descr=>read_structdescr( lr_tabdescr ).
 
-    LOOP AT lt_dfies
-    INTO    ls_dfies.
+    LOOP AT lt_dfies  INTO    ls_dfies.
 
       CLEAR ls_fieldcat.
 
@@ -128,19 +176,15 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
       lv_output_length = strlen( ls_output_elem ).
       IF lv_output_length > lv_wrap_from_here.
         lv_predifined_wrap_respected = abap_false.
+        cl_abap_unit_assert=>fail( EXPORTING msg = |Wrap from value of { lv_wrap_from_here  } ignored with length { lv_output_length } at index { sy-index } |
+                                             detail = |{ ls_output_elem }| ).
       ENDIF.
     ENDLOOP.
-
-    cl_abap_unit_assert=>assert_true(
-      EXPORTING
-        act              = lv_predifined_wrap_respected    " Actual value
-        msg              = |Die Länge einer oder mehrerer Zeilen überschreitet die vorgegebene Länge.|    " Description
-    ).
 
   ENDMETHOD.
 
 
-  METHOD display_tab_4_aunit.
+  METHOD prepare_ouput_w_1_line_itab.
 
     TYPES: BEGIN OF ty_sflight_mini,
              carrid TYPE s_carr_id,
@@ -162,14 +206,8 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
           lv_predifined_wrap_respected TYPE                   abap_bool VALUE abap_true,
           lt_sflight                   TYPE STANDARD TABLE OF ty_sflight_mini.
 
-    SELECT carrid connid
-           fldate price
-       FROM sflight
-         INTO TABLE lt_sflight
-           WHERE carrid = 'AA'
-           AND   connid = '0017'
-           AND   fldate = '20170208'.
 
+    lt_sflight = VALUE #(  ( carrid = 'AA'   connid = '0017' fldate = '20170810' price = '422.94 ' ) ).
 
     CREATE DATA lr_data LIKE LINE OF lt_sflight.
 
@@ -196,28 +234,15 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
         it_fieldcatalog = it_fieldcatalog
         iv_wrap_from_here  = lv_wrap_from_here ).
 
-    lv_output_exp = |LT_SFLIGHT = VALUE #(\n  (    CARRID = 'AA'\t\n   CONNID = '0017'\t\n   FLDATE = '20170208'\t\n   PRICE = '422.94'\t )\n\n). |.
+    lv_output_exp = |LT_SFLIGHT = VALUE #(\n  (    CARRID = 'AA'\t\n   CONNID = '0017'\t\n   FLDATE = '20170810'\t\n   PRICE = '422.94'\t )\n\n). |.
 
+    "#TODO: replace this comparison with one that exactly shows chars wich are different to expectation
     cl_abap_unit_assert=>assert_equals(
       EXPORTING
         act                  = lv_output    " Data object with current value
         exp                  = lv_output_exp    " Data object with expected type
-        msg                  = |String stimmt nicht überein.|
-    ).
+        msg                  = |Character String Different|
 
-
-    SPLIT lv_output AT cl_abap_char_utilities=>newline INTO TABLE lt_outputlist.
-    LOOP AT lt_outputlist INTO DATA(ls_output_elem).
-      lv_output_length = strlen( ls_output_elem ).
-      IF lv_output_length > lv_wrap_from_here.
-        lv_predifined_wrap_respected = abap_false.
-      ENDIF.
-    ENDLOOP.
-
-    cl_abap_unit_assert=>assert_true(
-      EXPORTING
-        act              = lv_predifined_wrap_respected    " Actual value
-        msg              = |Die Länge einer oder mehrerer Zeilen überschreitet die vorgegebene Länge.|    " Description
     ).
 
   ENDMETHOD.
