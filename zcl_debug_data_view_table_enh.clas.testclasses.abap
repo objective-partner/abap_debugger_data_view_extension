@@ -71,6 +71,8 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
                         it_fieldcatalog   = lt_fieldcatalog
                         iv_wrap_from_here = lv_wrap_from_here ).
 
+      cl_abap_unit_assert=>fail('add an assert statement here').
+
   ENDMETHOD.
   METHOD check_4_correct_wrap.
     DATA:
