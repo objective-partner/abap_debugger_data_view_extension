@@ -12,6 +12,10 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    CONSTANTS:
+      c_newline TYPE abap_char1 VALUE cl_abap_char_utilities=>cr_lf,
+      c_tab     TYPE c          VALUE cl_abap_char_utilities=>horizontal_tab.
+
     CLASS-METHODS:
       prepare_output
         IMPORTING
@@ -24,7 +28,13 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION
         IMPORTING
           iv_wrap_from_here        TYPE i OPTIONAL
         RETURNING
-          VALUE(rv_wrap_from_here) TYPE i.
+          VALUE(rv_wrap_from_here) TYPE i,
+      current_string_length
+        IMPORTING
+          iv_current_context              TYPE string
+          iv_tab_line                     TYPE tpda_struc_view
+        RETURNING
+          VALUE(rv_current_string_length) TYPE i.
 ENDCLASS.
 
 
@@ -42,30 +52,27 @@ CLASS zcl_debug_data_view_struc_enh IMPLEMENTATION.
 
     lv_wrap_from_here = get_wrap_from_value( iv_wrap_from_here = iv_wrap_from_here  ).
 
-    rv_content_4_display = |{ iv_struc_name } = VALUE #( |.
+    rv_content_4_display = |{ iv_struc_name } = VALUE #({ c_tab }|.
     LOOP AT it_struc_data ASSIGNING <s_tab_line>.
       "print current column
       CHECK <s_tab_line>-varvalue IS NOT INITIAL AND
             <s_tab_line>-component NE |INDEX|.
 
-      DATA(lv_current_string_length) =  strlen( |{ lv_current_context } { <s_tab_line>-component } = '{ <s_tab_line>-varvalue }'| ).
+      "calculate temp context length from last TAB offset position
+      DATA(lv_current_string_length) = current_string_length( iv_current_context = lv_current_context iv_tab_line = <s_tab_line> ).
 
       IF lv_current_string_length > lv_wrap_from_here.
-        " new column value combination does not fit and must be placed in a new line, do that with \r (Carriage Return)
-        lv_current_context = |{ lv_current_context } \r { <s_tab_line>-component } = '{ <s_tab_line>-varvalue }'\t|.
+        " new column value combination does not fit and must be placed in a new line, do that with { c_newline } (Carriage Return)
+        lv_current_context = |{ lv_current_context }{ c_newline }{ <s_tab_line>-component } = '{ <s_tab_line>-varvalue }'{ c_tab }|.
       ELSE.
-        lv_current_context = |{ lv_current_context } { <s_tab_line>-component } = '{ <s_tab_line>-varvalue }'\t|.
+        lv_current_context = |{ lv_current_context }{ <s_tab_line>-component } = '{ <s_tab_line>-varvalue }'{ c_tab }|.
       ENDIF.
 
-      IF lv_current_context NE space.
-        rv_content_4_display = |{ rv_content_4_display }  { lv_current_context }|.
-      ENDIF.
 
-      CLEAR: lv_current_context.
 
     ENDLOOP.
 
-    rv_content_4_display = |{ rv_content_4_display } ).|.
+    rv_content_4_display = |{ rv_content_4_display }{ lv_current_context }).|.
   ENDMETHOD.
 
 
@@ -83,10 +90,27 @@ CLASS zcl_debug_data_view_struc_enh IMPLEMENTATION.
     IF iv_wrap_from_here > 0.
       rv_wrap_from_here = iv_wrap_from_here.
     ELSE.
+      rv_wrap_from_here = 170.
       DATA(lv_wrap_from_text) = |{ 'add line wrap on character number:'(001) }|.
       cl_demo_input=>request( EXPORTING text  = lv_wrap_from_text
                               CHANGING  field = rv_wrap_from_here ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD current_string_length.
+
+    FIND ALL OCCURRENCES OF c_newline IN iv_current_context MATCH OFFSET DATA(l_newline_offset).
+    rv_current_string_length  = strlen( iv_current_context ).
+    DATA(lv_tmp_context) = substring( val = iv_current_context off = l_newline_offset len = ( rv_current_string_length - l_newline_offset ) ).
+
+
+    lv_tmp_context = |{ lv_tmp_context }{ iv_tab_line-component } = '{ iv_tab_line-varvalue }'{ c_tab }|.
+    "do the trick with \t and count it as 4 char spaces instead as one char
+    "todo so replace it temporarly
+    REPLACE ALL OCCURRENCES OF  c_tab IN  lv_tmp_context WITH |    |.
+    rv_current_string_length =  strlen( lv_tmp_context ).
 
   ENDMETHOD.
 
