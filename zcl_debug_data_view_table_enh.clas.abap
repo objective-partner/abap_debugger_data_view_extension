@@ -15,45 +15,35 @@ CLASS zcl_debug_data_view_table_enh DEFINITION
         IMPORTING
           it_table        TYPE ANY TABLE
           it_fieldcatalog TYPE lvc_t_fcat
-          iv_table_title  TYPE string .
+          iv_table_title  TYPE string.
+
   PRIVATE SECTION.
-    DATA m_times_called TYPE i.
+    CONSTANTS:
+      c_newline TYPE abap_char1 VALUE cl_abap_char_utilities=>cr_lf,
+      c_tab     TYPE c          VALUE cl_abap_char_utilities=>horizontal_tab.
 
     METHODS:
       prepare_output
         IMPORTING
-          !it_fieldcatalog      TYPE lvc_t_fcat
-          !it_table             TYPE ANY TABLE
-          !iv_wrap_from_here    TYPE i OPTIONAL
-          !iv_table_title       TYPE string
+          it_fieldcatalog             TYPE lvc_t_fcat
+          it_table                    TYPE ANY TABLE
+          iv_wrap_from_here           TYPE i OPTIONAL
+          iv_table_title              TYPE string
         RETURNING
-          VALUE(rv_content_4_display) TYPE string,
-      get_next_value
-        IMPORTING is_field_info       TYPE lvc_s_fcat
-                  iv_field_value      TYPE any
-        RETURNING VALUE(rv_new_value) TYPE string.
-
+          VALUE(rv_content_4_display) TYPE string.
 ENDCLASS.
 
 
 
-CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
-
-
-  METHOD  get_next_value.
-    DATA(lv_value_as_string) = CONV string( iv_field_value ).
-    DATA(lv_width) = strlen( lv_value_as_string  ).
-
-    rv_new_value = |{ is_field_info-seltext } = '{ iv_field_value ALPHA = IN  WIDTH = lv_width }|.
-  ENDMETHOD.
+CLASS zcl_debug_data_view_table_enh IMPLEMENTATION.
 
 
   METHOD handle_toolbar_set.
-    CHECK m_times_called < 2.
+
+    CHECK NOT line_exists( e_object->mt_toolbar[ function = 'ZDATA_4_ABAP_VIEW' ] ).
 
     APPEND VALUE stb_button( function = 'ZDATA_4_ABAP_VIEW'  butn_type = 0 text = 'Data for ABAP View' ) TO e_object->mt_toolbar.
 
-    m_times_called = m_times_called + 1.
   ENDMETHOD.                   "handle_toolbar_set
 
 
@@ -61,13 +51,14 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
 
     FIELD-SYMBOLS: <s_tab_line> TYPE any.
     DATA: lv_string_main              TYPE string,
-          lv_string_line              TYPE string,
+          lv_current_context          TYPE string,
           lv_wrap_from_here           TYPE i VALUE 255,
           lv_possible_wrap_min_length TYPE i,
           lv_tmp_str                  TYPE string,
           lv_tmp_str_length           TYPE i.
 
 
+    DATA(lo_view_struc) = NEW zcl_debug_data_view_struc_enh( ).
     DATA(lv_wrap_from_text) = |{ 'add line wrap on character number:'(001) }|.
 
     IF iv_wrap_from_here IS NOT SUPPLIED.
@@ -78,32 +69,28 @@ CLASS ZCL_DEBUG_DATA_VIEW_TABLE_ENH IMPLEMENTATION.
     ENDIF.
     lv_possible_wrap_min_length = lv_wrap_from_here.
 
-    rv_content_4_display = |{ iv_table_title } = VALUE #(\n|.
+    rv_content_4_display = |{ iv_table_title } = VALUE #({ c_newline }|.
     LOOP AT it_table ASSIGNING <s_tab_line>.
-      rv_content_4_display = |{ rv_content_4_display }  ( |.
+      rv_content_4_display = |{ rv_content_4_display }({ c_tab }|.
       "* print columns
       LOOP AT it_fieldcatalog INTO DATA(ls_field_info).
         ASSIGN COMPONENT ls_field_info-fieldname OF STRUCTURE <s_tab_line> TO FIELD-SYMBOL(<v_field>).
         CHECK <v_field> IS ASSIGNED AND
               <v_field> IS NOT INITIAL AND
               ls_field_info-seltext NE |INDEX|.
-        DATA(lv_temp_string) = |{ lv_string_line } { get_next_value( is_field_info = ls_field_info  iv_field_value = <v_field> ) }'|. "add column and value like -> MAND = '100'
-        DATA(lv_temp_string_length) =  strlen( lv_temp_string ).
 
-        IF lv_temp_string_length > lv_wrap_from_here.
-          " new column value combination does not fit and must be placed in a new line
-          rv_content_4_display = |{ rv_content_4_display }  { lv_string_line }\n|. "wrap line here
-          CLEAR: lv_string_line.
-        ENDIF.
-        lv_string_line = |{ lv_string_line } { get_next_value( is_field_info = ls_field_info  iv_field_value = <v_field> ) }'\t|.
+        lv_current_context = lo_view_struc->add_component(
+                               iv_current_context = lv_current_context
+                               iv_wrap_from_here  = lv_wrap_from_here
+                               i_component        = VALUE #( component = ls_field_info-seltext varvalue = <v_field> )  ).
       ENDLOOP.
-      IF lv_string_line NE space.
-        rv_content_4_display = |{ rv_content_4_display }  { lv_string_line } )\n|. "* wrap line on each new added itab line
+      IF lv_current_context NE space.
+        rv_content_4_display = |{ rv_content_4_display }{ lv_current_context }){ c_newline }|. "* wrap line on each new added itab line
       ENDIF.
-      CLEAR: lv_string_line.
+      CLEAR: lv_current_context.
     ENDLOOP.
 
-    rv_content_4_display = |{ rv_content_4_display }\n). |.
+    rv_content_4_display = |{ rv_content_4_display }{ c_tab }).|.
   ENDMETHOD.
 
 

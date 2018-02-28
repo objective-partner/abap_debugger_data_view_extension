@@ -55,7 +55,7 @@ CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
                           ).
 
 
-    rv_content = zcl_debug_data_view_struc_enh=>prepare_output(
+    rv_content = new zcl_debug_data_view_struc_enh( )->prepare_output(
         it_struc_data = it_struc_data
         iv_wrap_from_here = 170
         iv_struc_name = |IS_STRUCTURE| ).

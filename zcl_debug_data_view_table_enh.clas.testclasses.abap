@@ -13,9 +13,7 @@ CLASS ltc_debug_data_view_table_enh DEFINITION FOR TESTING
     METHODS:
       "!check of
       prepare_ouput_w_1_line_itab FOR TESTING,
-      check_4_correct_wrap FOR TESTING,
-      "!check for
-      correct_negative_numbers_value FOR TESTING.
+      check_4_correct_wrap        FOR TESTING.
 ENDCLASS.       "ltcl_aunit_debugger_table_enh
 
 
@@ -32,48 +30,7 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD correct_negative_numbers_value.
-    TYPES: BEGIN OF negative_num_type,
-             price TYPE s_price,
-           END OF   negative_num_type.
 
-    DATA:
-      lv_wrap_from_here TYPE                   i VALUE 255,
-      ls_fieldcat       TYPE                   lvc_s_fcat,
-      lt_fieldcatalog   TYPE                   lvc_t_fcat,
-      lt_negative_num   TYPE STANDARD TABLE OF negative_num_type WITH EMPTY KEY,
-      lr_tabledescr     TYPE REF TO cl_abap_structdescr.
-
-    lt_negative_num = VALUE #( ( price = -100 )
-                               ( price = -99 )
-                               ( price = -1 )
-                               ( price = 0 )
-                               ( price = 1 )
-                               ( price = 99 )
-                               ( price = 100 ) ).
-
-    lr_tabledescr  ?= cl_abap_structdescr=>describe_by_data(  lt_negative_num[ 1 ] ).
-
-    DATA(lt_dfies) = cl_salv_data_descr=>read_structdescr(  lr_tabledescr  ).
-
-    LOOP AT lt_dfies  INTO DATA(ls_dfies).
-      CLEAR ls_fieldcat.
-      MOVE-CORRESPONDING ls_dfies TO ls_fieldcat.
-      ls_fieldcat-seltext = ls_dfies-fieldname.
-      APPEND ls_fieldcat TO lt_fieldcatalog.
-    ENDLOOP.
-
-    lv_wrap_from_here = 170.
-
-    DATA(lv_output) = lo_aunit_debugger_table_enh->prepare_output(
-                        it_table          = lt_negative_num
-                        iv_table_title    = 'LT_NUMBERS'
-                        it_fieldcatalog   = lt_fieldcatalog
-                        iv_wrap_from_here = lv_wrap_from_here ).
-
-      cl_abap_unit_assert=>fail('add an assert statement here').
-
-  ENDMETHOD.
   METHOD check_4_correct_wrap.
     DATA:
       lv_wrap_from_here            TYPE                   i VALUE 255,
@@ -173,7 +130,7 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
                         iv_wrap_from_here = lv_wrap_from_here ).
 
 
-    SPLIT lv_output AT cl_abap_char_utilities=>newline INTO TABLE lt_outputlist.
+    SPLIT lv_output AT lo_aunit_debugger_table_enh->c_newline INTO TABLE lt_outputlist.
     LOOP AT lt_outputlist INTO DATA(ls_output_elem).
       lv_output_length = strlen( ls_output_elem ).
       IF lv_output_length > lv_wrap_from_here.
@@ -236,16 +193,15 @@ CLASS ltc_debug_data_view_table_enh IMPLEMENTATION.
         it_fieldcatalog = it_fieldcatalog
         iv_wrap_from_here  = lv_wrap_from_here ).
 
-    lv_output_exp = |LT_SFLIGHT = VALUE #(\n  (    CARRID = 'AA'\t\n   CONNID = '0017'\t\n   FLDATE = '20170810'\t\n   PRICE = '422.94'\t )\n\n). |.
-
+    lv_output_exp = |LT_SFLIGHT = VALUE #(\r(\tCARRID = 'AA'\t\rCONNID = '0017'\t\rFLDATE = '20170810'\t\rPRICE = '422.94 '\t)\r\t).|.
     "#TODO: replace this comparison with one that exactly shows chars wich are different to expectation
     cl_abap_unit_assert=>assert_equals(
-      EXPORTING
-        act                  = lv_output    " Data object with current value
-        exp                  = lv_output_exp    " Data object with expected type
-        msg                  = |Character String Different|
+                                       EXPORTING
+                                         act                  = lv_output
+                                         exp                  = lv_output_exp
+                                         msg                  = |Character String Different|
+                                      ).
 
-    ).
 
   ENDMETHOD.
 

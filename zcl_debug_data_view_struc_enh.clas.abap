@@ -1,21 +1,23 @@
 CLASS zcl_debug_data_view_struc_enh DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
 
-    CLASS-METHODS show_popup_w_content
-      IMPORTING
-        !it_struc_data TYPE tpda_struc_view_it
-        !iv_struc_name TYPE string .
-    CLASS-METHODS current_context
-      IMPORTING
-        iv_current_context        TYPE string
-        iv_wrap_from_here         TYPE i
-        i_tab_line                TYPE tpda_struc_view
-      RETURNING
-        VALUE(rv_current_context) TYPE string.
+    METHODS:
+      show_popup_w_content
+        IMPORTING
+          !it_struc_data TYPE tpda_struc_view_it
+          !iv_struc_name TYPE string,
+      add_component
+        IMPORTING
+          iv_current_context        TYPE string
+          iv_wrap_from_here         TYPE i
+          i_component               TYPE tpda_struc_view
+        RETURNING
+          VALUE(rv_current_context) TYPE string.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -23,7 +25,7 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION
       c_newline TYPE abap_char1 VALUE cl_abap_char_utilities=>cr_lf,
       c_tab     TYPE c          VALUE cl_abap_char_utilities=>horizontal_tab.
 
-    CLASS-METHODS:
+    METHODS:
       prepare_output
         IMPORTING
           !it_struc_data              TYPE tpda_struc_view_it
@@ -39,26 +41,32 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION
       current_string_length
         IMPORTING
           iv_current_context              TYPE string
-          iv_tab_line                     TYPE tpda_struc_view
+          i_component                     TYPE tpda_struc_view
         RETURNING
           VALUE(rv_current_string_length) TYPE i.
 ENDCLASS.
 
 
 
-CLASS ZCL_DEBUG_DATA_VIEW_STRUC_ENH IMPLEMENTATION.
+CLASS zcl_debug_data_view_struc_enh IMPLEMENTATION.
 
 
-  METHOD current_context.
+  METHOD add_component.
+
+    rv_current_context = iv_current_context.
+
+    CHECK i_component-varvalue IS NOT INITIAL AND
+          i_component-component NE |INDEX|.
+
 
     "calculate temp context length from last TAB offset position
-    DATA(lv_current_string_length) = current_string_length( iv_current_context = iv_current_context iv_tab_line = i_tab_line ).
+    DATA(lv_current_string_length) = current_string_length( iv_current_context = iv_current_context i_component = i_component ).
 
     IF lv_current_string_length > iv_wrap_from_here.
       " new column value combination does not fit and must be placed in a new line, do that with { c_newline } (Carriage Return)
-      rv_current_context = |{ iv_current_context }{ c_newline }{ i_tab_line-component } = '{ i_tab_line-varvalue }'{ c_tab }|.
+      rv_current_context = |{ iv_current_context }{ c_newline }{ i_component-component } = '{ i_component-varvalue }'{ c_tab }|.
     ELSE.
-      rv_current_context = |{ iv_current_context }{ i_tab_line-component } = '{ i_tab_line-varvalue }'{ c_tab }|.
+      rv_current_context = |{ iv_current_context }{ i_component-component } = '{ i_component-varvalue }'{ c_tab }|.
     ENDIF.
 
   ENDMETHOD.
@@ -71,7 +79,7 @@ CLASS ZCL_DEBUG_DATA_VIEW_STRUC_ENH IMPLEMENTATION.
     DATA(lv_tmp_context) = substring( val = iv_current_context off = l_newline_offset len = ( rv_current_string_length - l_newline_offset ) ).
 
 
-    lv_tmp_context = |{ lv_tmp_context }{ iv_tab_line-component } = '{ iv_tab_line-varvalue }'{ c_tab }|.
+    lv_tmp_context = |{ lv_tmp_context }{ i_component-component } = '{ i_component-varvalue }'{ c_tab }|.
     "do the trick with \t and count it as 4 char spaces instead as one char
     "todo so replace it temporarly
     REPLACE ALL OCCURRENCES OF  c_tab IN  lv_tmp_context WITH |    |.
@@ -95,7 +103,7 @@ CLASS ZCL_DEBUG_DATA_VIEW_STRUC_ENH IMPLEMENTATION.
 
 
   METHOD prepare_output.
-    FIELD-SYMBOLS: <s_tab_line> TYPE tpda_struc_view.
+    FIELD-SYMBOLS: <s_component> TYPE tpda_struc_view.
     DATA: lv_string_main     TYPE string,
           lv_current_context TYPE string,
           lv_wrap_from_here  TYPE i VALUE 255.
@@ -105,15 +113,12 @@ CLASS ZCL_DEBUG_DATA_VIEW_STRUC_ENH IMPLEMENTATION.
     lv_wrap_from_here = get_wrap_from_value( iv_wrap_from_here = iv_wrap_from_here  ).
 
     rv_content_4_display = |{ iv_struc_name } = VALUE #({ c_tab }|.
-    LOOP AT it_struc_data ASSIGNING <s_tab_line>.
-      "print current column
-      CHECK <s_tab_line>-varvalue IS NOT INITIAL AND
-            <s_tab_line>-component NE |INDEX|.
+    LOOP AT it_struc_data ASSIGNING <s_component>.
 
-      lv_current_context = current_context(
+      lv_current_context = add_component(
                                             iv_current_context    = lv_current_context
                                             iv_wrap_from_here     = lv_wrap_from_here
-                                            i_tab_line            = <s_tab_line> ).
+                                            i_component            = <s_component> ).
 
     ENDLOOP.
 
