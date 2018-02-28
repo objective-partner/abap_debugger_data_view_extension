@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_ENHO" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TOOL>HOOK_IMPL</TOOL>
+   <SHORTTEXT>Debugger extension for table view</SHORTTEXT>
+   <ORIGINAL_OBJECT>
+    <PGMID>R3TR</PGMID>
+    <ORG_OBJ_TYPE>CLAS</ORG_OBJ_TYPE>
+    <ORG_OBJ_NAME>CL_TPDA_TOOL_TABLE_NEW</ORG_OBJ_NAME>
+    <ORG_MAIN_TYPE>CLAS</ORG_MAIN_TYPE>
+    <ORG_MAIN_NAME>CL_TPDA_TOOL_TABLE_NEW</ORG_MAIN_NAME>
+    <PROGRAMNAME>CL_TPDA_TOOL_TABLE_NEW========CP</PROGRAMNAME>
+   </ORIGINAL_OBJECT>
+   <ENHANCEMENTS>
+    <ENH_HOOK_IMPL>
+     <PROGRAMNAME>CL_TPDA_TOOL_TABLE_NEW========CP</PROGRAMNAME>
+     <EXTID>1</EXTID>
+     <ID>1</ID>
+     <ENHMODE>D</ENHMODE>
+     <FULL_NAME>\TY:CL_TPDA_TOOL_TABLE_NEW\IN:IF_TPDA_TOOL_SERVICES\ME:BUILD_SERVICES_MENUE\SE:END\EI</FULL_NAME>
+     <SOURCE>
+      <item>DATA l_zz_node LIKE LINE OF p_it_menue_tree.</item>
+      <item>CLEAR l_zz_node.</item>
+      <item/>
+      <item>l_zz_node-node_key  = &apos;ZDATA_4_ABAP&apos;.</item>
+      <item>l_zz_node-relatkey  = cl_tpda_services_tools=&gt;c_special.</item>
+      <item>l_zz_node-n_image   = cl_tpda_icons=&gt;tpda_icon_download.</item>
+      <item>l_zz_node-relatship = cl_gui_simple_tree=&gt;relat_last_child.</item>
+      <item>l_zz_node-text      = &apos;Data for Abap View&apos;.</item>
+      <item/>
+      <item>APPEND l_zz_node TO p_it_menue_tree.</item>
+     </SOURCE>
+    </ENH_HOOK_IMPL>
+    <ENH_HOOK_IMPL>
+     <PROGRAMNAME>CL_TPDA_TOOL_TABLE_NEW========CP</PROGRAMNAME>
+     <EXTID>3</EXTID>
+     <ID>3</ID>
+     <ENHMODE>D</ENHMODE>
+     <FULL_NAME>\TY:CL_TPDA_TOOL_TABLE_NEW\ME:HANDLE_OK_CODE\SE:BEGIN\EI</FULL_NAME>
+     <SOURCE>
+      <item>IF i_action EQ &apos;ZD&apos; AND i_subaction EQ &apos;ATA_4_ABAP&apos;.</item>
+      <item>create_real_clone(</item>
+      <item>IMPORTING</item>
+      <item>e_rda_table      = DATA(l_zz_rda_table)</item>
+      <item>e_tab_fcat       = DATA(l_zz_tab_fcat)  ).</item>
+      <item/>
+      <item>FIELD-SYMBOLS: &lt;t_any_tab&gt;  type table.</item>
+      <item>ASSIGN l_zz_rda_table-&gt;* TO &lt;t_any_tab&gt;.</item>
+      <item/>
+      <item>NEW zcl_debug_data_view_table_enh( )-&gt;show_popup_w_content(</item>
+      <item>EXPORTING</item>
+      <item>it_table        =  &lt;t_any_tab&gt;</item>
+      <item>it_fieldcatalog =  l_zz_tab_fcat</item>
+      <item>iv_table_title  =  me-&gt;dynp_vars-table_name</item>
+      <item>).</item>
+      <item/>
+      <item>RETURN.</item>
+      <item>ENDIF.</item>
+     </SOURCE>
+    </ENH_HOOK_IMPL>
+   </ENHANCEMENTS>
+   <SPACES>
+    <item>
+     <FULL_NAME>\TY:CL_TPDA_TOOL_TABLE_NEW\IN:IF_TPDA_TOOL_SERVICES\ME:BUILD_SERVICES_MENUE\SE:END\EI</FULL_NAME>
+     <SPACES>
+      <item>1</item>
+      <item>1</item>
+      <item>0</item>
+      <item>1</item>
+      <item>1</item>
+      <item>1</item>
+      <item>1</item>
+      <item>1</item>
+      <item>0</item>
+      <item>1</item>
+     </SPACES>
+    </item>
+    <item>
+     <FULL_NAME>\TY:CL_TPDA_TOOL_TABLE_NEW\ME:HANDLE_OK_CODE\SE:BEGIN\EI</FULL_NAME>
+     <SPACES>
+      <item>0</item>
+      <item>3</item>
+      <item>6</item>
+      <item>8</item>
+      <item>8</item>
+      <item>0</item>
+      <item>3</item>
+      <item>3</item>
+      <item>0</item>
+      <item>3</item>
+      <item>5</item>
+      <item>7</item>
+      <item>7</item>
+      <item>7</item>
+      <item>3</item>
+      <item>0</item>
+      <item>3</item>
+      <item>1</item>
+     </SPACES>
+    </item>
+   </SPACES>
+  </asx:values>
+ </asx:abap>
+</abapGit>
