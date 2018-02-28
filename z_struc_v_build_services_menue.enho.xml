@@ -40,7 +40,8 @@
      <FULL_NAME>\TY:CL_TPDA_TOOL_STRUC_VIEW\IN:IF_TPDA_TOOL\ME:HANDLE_OK_CODE\SE:BEGIN\EI</FULL_NAME>
      <SOURCE>
       <item>IF p_ok_code-ok_code EQ &apos;ZDATA_4_ABAP&apos;.</item>
-      <item>zcl_debug_data_view_struc_enh=&gt;show_popup_w_content( iv_struc_name = dynp_vars-struc_name</item>
+      <item>NEW zcl_debug_data_view_struc_enh(</item>
+      <item>)-&gt;show_popup_w_content( iv_struc_name = dynp_vars-struc_name</item>
       <item>it_struc_data = dynp_vars-it_struc_view_tc ).</item>
       <item>RETURN.</item>
       <item>ENDIF.</item>
@@ -68,7 +69,8 @@
      <SPACES>
       <item>1</item>
       <item>3</item>
-      <item>56</item>
+      <item>10</item>
+      <item>35</item>
       <item>3</item>
       <item>1</item>
      </SPACES>
