@@ -73,7 +73,31 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION
         CHANGING
           ct_struc_data          TYPE tpda_struc_view_it
         RETURNING
-          VALUE(rt_nested_struc) TYPE tpda_struc_view_it.
+          VALUE(rt_nested_struc) TYPE tpda_struc_view_it,
+      add_rhs_prefix
+        IMPORTING
+          iv_is_type_given                TYPE boole_d
+        RETURNING
+          VALUE(rv_right_hand_side_value) TYPE string,
+      add_rhs_postfix
+        IMPORTING
+          iv_right_hand_side_value        TYPE string
+        RETURNING
+          VALUE(rv_right_hand_side_value) TYPE string,
+      add_rhs_value
+        IMPORTING
+                  iv_wrap_from_here               TYPE i
+                  iv_right_hand_side_value        TYPE string
+        CHANGING
+                  ct_struc_data                   TYPE tpda_struc_view_it
+        RETURNING VALUE(rv_right_hand_side_value) TYPE string,
+      add_rhs_value_and_postfix
+        IMPORTING
+          iv_wrap_from_here        TYPE i
+        EXPORTING
+          ev_right_hand_side_value TYPE string
+        CHANGING
+          ct_struc_data            TYPE tpda_struc_view_it.
 
 ENDCLASS.
 
@@ -179,32 +203,21 @@ CLASS zcl_debug_data_view_struc_enh IMPLEMENTATION.
 
   METHOD right_hand_side.
 
-    DATA: lv_current_context TYPE string,
-          lt_struc_data      TYPE tpda_struc_view_it.
+    DATA:
+      lv_current_context TYPE string,
+      lt_struc_data      TYPE tpda_struc_view_it.
     lt_struc_data = it_struc_data.
-    rv_right_hand_side_value = COND string( WHEN iv_is_type_given EQ abap_true
-                                                  THEN | = VALUE \{i_type\}({ c_tab }|  "TODO implement type here
-                                              ELSE | = VALUE #({ c_tab }| ).
 
-    LOOP AT lt_struc_data ASSIGNING FIELD-SYMBOL(<s_component>).
+    rv_right_hand_side_value = add_rhs_prefix( iv_is_type_given ).
 
-      IF  <s_component>-varvalue CS 'Structure'.
-        lv_current_context = handle_nested_structure(
-                                                      EXPORTING
-                                                        iv_current_context = lv_current_context
-                                                        iv_wrap_from_here  = iv_wrap_from_here
-                                                        is_component       = <s_component>
-                                                      CHANGING
-                                                        ct_struc_data = lt_struc_data ).
-      ELSE.
-        lv_current_context = add_component(
-                                              iv_current_context    = lv_current_context
-                                              iv_wrap_from_here     = iv_wrap_from_here
-                                              i_component            = <s_component> ).
-      ENDIF.
-    ENDLOOP.
+    add_rhs_value_and_postfix(
+          EXPORTING
+            iv_wrap_from_here = iv_wrap_from_here
+          IMPORTING
+            ev_right_hand_side_value = rv_right_hand_side_value
+          CHANGING
+            ct_struc_data = lt_struc_data ).
 
-    rv_right_hand_side_value = |{ rv_right_hand_side_value }{ lv_current_context })|.
   ENDMETHOD.
 
 
@@ -216,10 +229,65 @@ CLASS zcl_debug_data_view_struc_enh IMPLEMENTATION.
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>display( lv_content_4_display ).
   ENDMETHOD.
+
   METHOD component_name.
     rv_component_name = iv_component_name.
-*    rv_component_name = condense( val =  iv_component_name del = space ).
     CONDENSE rv_component_name NO-GAPS.
+  ENDMETHOD.
+
+  METHOD add_rhs_prefix.
+
+    rv_right_hand_side_value = COND string( WHEN iv_is_type_given EQ abap_true
+                                                  THEN | = VALUE \{i_type\}({ c_tab }|  "TODO implement type here
+                                              ELSE | = VALUE #({ c_tab }| ).
+
+  ENDMETHOD.
+
+
+  METHOD add_rhs_postfix.
+
+    rv_right_hand_side_value = |{ iv_right_hand_side_value })|.
+
+  ENDMETHOD.
+
+
+  METHOD add_rhs_value.
+
+    DATA lv_current_context TYPE string.
+
+    LOOP AT ct_struc_data ASSIGNING FIELD-SYMBOL(<s_component>).
+
+      IF  <s_component>-varvalue CS 'Structure'.
+        lv_current_context = handle_nested_structure(
+                                                      EXPORTING
+                                                        iv_current_context = lv_current_context
+                                                        iv_wrap_from_here  = iv_wrap_from_here
+                                                        is_component       = <s_component>
+                                                      CHANGING
+                                                        ct_struc_data = ct_struc_data ).
+      ELSE.
+        lv_current_context = add_component(
+                                              iv_current_context    = lv_current_context
+                                              iv_wrap_from_here     = iv_wrap_from_here
+                                              i_component            = <s_component> ).
+      ENDIF.
+    ENDLOOP.
+
+    rv_right_hand_side_value = |{ iv_right_hand_side_value }{ lv_current_context }|.
+
+  ENDMETHOD.
+
+
+  METHOD add_rhs_value_and_postfix.
+
+    ev_right_hand_side_value =  add_rhs_value(
+          EXPORTING
+            iv_wrap_from_here = iv_wrap_from_here
+            iv_right_hand_side_value = ev_right_hand_side_value
+          CHANGING
+            ct_struc_data = ct_struc_data ).
+    ev_right_hand_side_value = add_rhs_postfix( ev_right_hand_side_value ).
+
   ENDMETHOD.
 
 ENDCLASS.
