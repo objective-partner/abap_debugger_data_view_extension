@@ -4,16 +4,20 @@ CLASS zcl_debug_data_view_struc_enh DEFINITION LOCAL FRIENDS ltc_debug_data_view
 CLASS ltc_debug_data_view_struc_enh DEFINITION FOR TESTING DURATION SHORT  RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
-    METHODS: check_4_correct_output FOR TESTING.
+    DATA:
+    it_struc_data       TYPE tpda_struc_view_it.
+    METHODS:
+      process_simple_structure FOR TESTING,
+      process_nested_structure FOR TESTING,
+      process_mixed_structure FOR TESTING.
 ENDCLASS.       "ltc_aunit_debugger_struc_enh
 
 
 CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
 
-  METHOD check_4_correct_output.
+  METHOD process_simple_structure.
 
     DATA:
-      it_struc_data       TYPE tpda_struc_view_it,
       iv_wrap_from_here   TYPE i,
       iv_struc_name       TYPE string,
       rv_content          TYPE string,
@@ -55,7 +59,7 @@ CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
                           ).
 
 
-    rv_content = new zcl_debug_data_view_struc_enh( )->prepare_output(
+    rv_content = NEW zcl_debug_data_view_struc_enh( )->prepare_output(
         it_struc_data = it_struc_data
         iv_wrap_from_here = 170
         iv_struc_name = |IS_STRUCTURE| ).
@@ -66,7 +70,72 @@ CLASS ltc_debug_data_view_struc_enh IMPLEMENTATION.
       exp   =  rv_content_expected
       msg   = 'Struktur String wurde nicht richtig aufbereitet'
     ).
+  ENDMETHOD.
 
+  METHOD process_nested_structure.
+
+    it_struc_data = VALUE #(
+                                ( nr = '         1' component = 'COL1'  varvalue = '1' varvalhex = '01000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL1' level = '         1'   )
+                                ( nr = '         2' component = 'COL2'  varvalue = 'Structure: flat, not charlike'  varvalhex = '0100000002000000'
+                                                        vartype = 'Structure: flat, not charlike(8)' varabstypename = '\PROGRAM=Z_DEBUGGER_DATA_VIEW_EXT_DEMO\TYPE=T_COL2'
+                                                                var_val_tech = 'X'  complong = 'NESTED_STRUC-COL2' level = '         1'   )
+                                ( nr = '         3' component = '          COL1'  varvalue = '1' varvalhex = '01000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL2-COL1' level = '         2'   )
+                                ( nr = '         4' component = '          COL2'  varvalue = '2' varvalhex = '02000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL2-COL2' level = '         2'   )
+
+                           ).
+
+
+
+    DATA(rv_content_expected) = |IS_NESTED_STRUCTURE = VALUE #(\tCOL1 = '1'\tCOL2 = VALUE #(\tCOL1 = '1'\tCOL2 = '2'\t)\t).|.
+
+
+    DATA(rv_content) = NEW zcl_debug_data_view_struc_enh( )->prepare_output(
+                                            it_struc_data = it_struc_data
+                                            iv_wrap_from_here = 170
+                                            iv_struc_name = |IS_NESTED_STRUCTURE| ).
+
+
+    cl_abap_unit_assert=>assert_equals(
+      act   = rv_content
+      exp   =  rv_content_expected
+      msg   = 'Nested structure was not formated as expected'
+    ).
+
+  ENDMETHOD.
+
+  METHOD process_mixed_structure.
+ it_struc_data = VALUE #(
+                                ( nr = '         1' component = 'COL1'  varvalue = '1' varvalhex = '01000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL1' level = '         1'   )
+                                ( nr = '         2' component = 'COL2'  varvalue = 'Structure: flat, not charlike'  varvalhex = '0100000002000000'
+                                                        vartype = 'Structure: flat, not charlike(8)' varabstypename = '\PROGRAM=Z_DEBUGGER_DATA_VIEW_EXT_DEMO\TYPE=T_COL2'
+                                                                var_val_tech = 'X'  complong = 'NESTED_STRUC-COL2' level = '         1'   )
+                                ( nr = '         3' component = '          COL1'  varvalue = '1' varvalhex = '01000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL2-COL1' level = '         2'   )
+                                ( nr = '         4' component = '          COL2'  varvalue = '2' varvalhex = '02000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL2-COL2' level = '         2'   )
+                                ( nr = '         5' component = 'COL3'  varvalue = '3' varvalhex = '03000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL3' level = '         1'   )
+                                ( nr = '         6' component = 'COL4'  varvalue = 'Structure: flat, not charlike'  varvalhex = '0100000002000000'
+                                                        vartype = 'Structure: flat, not charlike(8)' varabstypename = '\PROGRAM=Z_DEBUGGER_DATA_VIEW_EXT_DEMO\TYPE=T_COL2'
+                                                                var_val_tech = 'X'  complong = 'NESTED_STRUC-COL4' level = '         1'   )
+                                ( nr = '         7' component = '          COL1'  varvalue = '1' varvalhex = '01000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL4-COL1' level = '         2'   )
+                                ( nr = '         8' component = '          COL2'  varvalue = '2' varvalhex = '02000000' vartype = 'I(4)' varabstypename = '\TYPE=I'  changable = 'X' complong = 'NESTED_STRUC-COL4-COL2' level = '         2'   )
+
+                        ).
+
+
+
+    DATA(rv_content_expected) = |IS_NESTED_STRUCTURE = VALUE #(\tCOL1 = '1'\tCOL2 = VALUE #(\tCOL1 = '1'\tCOL2 = '2'\t)\tCOL3 = '3'\tCOL4 = VALUE #(\tCOL1 = '1'\tCOL2 = '2'\t)\t).|.
+
+
+    DATA(rv_content) = NEW zcl_debug_data_view_struc_enh( )->prepare_output(
+                                            it_struc_data = it_struc_data
+                                            iv_wrap_from_here = 170
+                                            iv_struc_name = |IS_NESTED_STRUCTURE| ).
+
+
+    cl_abap_unit_assert=>assert_equals(
+      act   = rv_content
+      exp   =  rv_content_expected
+      msg   = 'Nested structure was not formated as expected'
+    ).
   ENDMETHOD.
 
 ENDCLASS.
