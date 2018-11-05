@@ -3,10 +3,10 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_DEBUG_DATA_VIEW_TABLE_ENH</CLSNAME>
+    <CLSNAME>ZCL_OP_STRUCTURE</CLSNAME>
     <VERSION>1</VERSION>
     <LANGU>D</LANGU>
-    <DESCRIPT>Erweiterung des ABAP Debuggers</DESCRIPT>
+    <DESCRIPT>AUnit - Struktur Darstellung</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
     <CLSFINAL>X</CLSFINAL>
@@ -19,8 +19,8 @@
     <item>
      <ID>I</ID>
      <KEY>001</KEY>
-     <ENTRY>Zeilenumbruch einbauen bei Zeichen:</ENTRY>
-     <LENGTH>70</LENGTH>
+     <ENTRY>Zeilenumbruch einbauen bei Zeichennummer:</ENTRY>
+     <LENGTH>82</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

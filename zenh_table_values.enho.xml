@@ -21,7 +21,7 @@
      <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\TY:LCL_TAB\ME:INIT_ALV\SE:END\EI</FULL_NAME>
      <SOURCE>
       <item>&quot;instantiate custom event reciever</item>
-      <item>mo_cust_rec  = NEW zcl_debug_data_view_table_enh( ).</item>
+      <item>mo_cust_rec  = NEW zcl_op_table( ).</item>
       <item/>
       <item>&quot;set reciever as handler for Debugger Table ALV</item>
       <item>SET HANDLER mo_cust_rec-&gt;handle_toolbar_set  FOR me-&gt;ref_alv.</item>
@@ -39,15 +39,22 @@
      <SOURCE>
       <item>CASE e_ucomm.</item>
       <item>WHEN &apos;ZDATA_4_ABAP_VIEW&apos;. &quot;user klicked on Button to display ABAP friendly table data</item>
-      <item>FIELD-SYMBOLS: &lt;l_tab&gt; TYPE ANY TABLE.</item>
-      <item>ASSIGN me-&gt;rda_table-&gt;* TO &lt;l_tab&gt;. &quot;get current table content</item>
+      <item>TRY.</item>
+      <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
+      <item/>
+      <item>DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
+      <item/>
+      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>ASSIGN zz_reference_to_data-&gt;* TO &lt;zz_table&gt;. &quot;de-referencing</item>
       <item/>
       <item>mo_cust_rec-&gt;show_popup_w_content(</item>
       <item>EXPORTING</item>
-      <item>it_table        = &lt;l_tab&gt;</item>
-      <item>iv_table_title  = me-&gt;table</item>
-      <item>it_fieldcatalog = get_fieldcat( )</item>
-      <item>).</item>
+      <item>i_table        = &lt;zz_table&gt;</item>
+      <item>i_table_title  = me-&gt;table</item>
+      <item>i_fieldcatalog = zz_field_catalog ).</item>
+      <item>CATCH cx_root into DATA(lx_root).</item>
+      <item>&quot;dont want to crash, so catch all catchable exceptions here</item>
+      <item>ENDTRY.</item>
       <item>ENDCASE.</item>
      </SOURCE>
     </ENH_HOOK_IMPL>
@@ -58,7 +65,7 @@
      <ENHMODE>S</ENHMODE>
      <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\IC:LSTPDA_TABLE_VALUESTOP\SE:END\EI</FULL_NAME>
      <SOURCE>
-      <item>DATA: mo_cust_rec TYPE REF TO zcl_debug_data_view_table_enh.</item>
+      <item>DATA: mo_cust_rec TYPE REF TO zcl_op_table.</item>
      </SOURCE>
     </ENH_HOOK_IMPL>
    </ENHANCEMENTS>
@@ -81,15 +88,22 @@
      <SPACES>
       <item>2</item>
       <item>6</item>
+      <item>7</item>
+      <item>10</item>
+      <item>0</item>
+      <item>10</item>
+      <item>0</item>
       <item>10</item>
       <item>10</item>
       <item>0</item>
       <item>10</item>
-      <item>12</item>
       <item>14</item>
-      <item>14</item>
-      <item>14</item>
-      <item>10</item>
+      <item>16</item>
+      <item>16</item>
+      <item>16</item>
+      <item>9</item>
+      <item>11</item>
+      <item>7</item>
       <item>2</item>
      </SPACES>
     </item>

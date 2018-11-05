@@ -33,7 +33,7 @@ TYPES: BEGIN OF t_struct,
 
 
 TYPES: my_itab_type         TYPE STANDARD TABLE OF t_struct WITH DEFAULT KEY,
-       my_nested_struc_type TYPE t_struct.
+       my_nested_struc_type TYPE                   t_struct.
 
 
 TYPES: BEGIN OF nested_type,
@@ -56,14 +56,16 @@ nested_struc =     VALUE my_nested_struc_type( col1 = 1 col2 = VALUE #(
                                                                         col2 = 2
                                                                        )
                                               ).
-itab_in_struc = VALUE nested_type( col1 = 1 col2 = VALUE #(
-                                                             col1 = 1
-                                                             col2 = 2
-                                                           )
-                                            col3 = VALUE #(
-                                                            ( col1 = 1 col2 = VALUE #( col1 = 1 col2 = 2 ) )
-                                                            ( col1 = 1 col2 = VALUE #( col1 = 1 col2 = 2 ) )
-                                                           )
+itab_in_struc = VALUE nested_type( col1 = 1
+
+                                    col2 = VALUE #(
+                                                    col1 = 11
+                                                    col2 = 22
+                                                  )
+                                    col3 = VALUE #(
+                                                   ( col1 = 311 col2 = VALUE #( col1 = 3121 col2 = 3122 ) )
+                                                   ( col1 = 321 col2 = VALUE #( col1 = 3221 col2 = 3222 ) )
+                                                  )
                                   ).
 
 
@@ -75,8 +77,6 @@ nested_itab  =     VALUE my_nested_itab_type( (   col1 = 1  col2 = VALUE #( col1
                                                                            )
                                                )
                                              ).
-
-
 
 "do something with structure
 DATA(ls_col2) = nested_struc-col2.

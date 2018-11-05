@@ -34,28 +34,30 @@
     </ENH_HOOK_IMPL>
     <ENH_HOOK_IMPL>
      <PROGRAMNAME>CL_TPDA_TOOL_TABLE_NEW========CP</PROGRAMNAME>
-     <EXTID>3</EXTID>
-     <ID>3</ID>
+     <EXTID>2</EXTID>
+     <ID>2</ID>
      <ENHMODE>D</ENHMODE>
      <FULL_NAME>\TY:CL_TPDA_TOOL_TABLE_NEW\ME:HANDLE_OK_CODE\SE:BEGIN\EI</FULL_NAME>
      <SOURCE>
       <item>IF i_action EQ &apos;ZD&apos; AND i_subaction EQ &apos;ATA_4_ABAP&apos;.</item>
-      <item>create_real_clone(</item>
-      <item>IMPORTING</item>
-      <item>e_rda_table      = DATA(l_zz_rda_table)</item>
-      <item>e_tab_fcat       = DATA(l_zz_tab_fcat)  ).</item>
+      <item>TRY.</item>
+      <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = dynp_vars-table_name ).</item>
       <item/>
-      <item>FIELD-SYMBOLS: &lt;t_any_tab&gt;  type table.</item>
-      <item>ASSIGN l_zz_rda_table-&gt;* TO &lt;t_any_tab&gt;.</item>
+      <item>DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
       <item/>
-      <item>NEW zcl_debug_data_view_table_enh( )-&gt;show_popup_w_content(</item>
+      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>ASSIGN zz_reference_to_data-&gt;* TO &lt;zz_table&gt;. &quot;de-referencing</item>
+      <item/>
+      <item>NEW zcl_op_table( )-&gt;show_popup_w_content(</item>
       <item>EXPORTING</item>
-      <item>it_table        =  &lt;t_any_tab&gt;</item>
-      <item>it_fieldcatalog =  l_zz_tab_fcat</item>
-      <item>iv_table_title  =  me-&gt;dynp_vars-table_name</item>
-      <item>).</item>
+      <item>i_table        =  &lt;zz_table&gt;</item>
+      <item>i_fieldcatalog =  zz_field_catalog</item>
+      <item>i_table_title  =  me-&gt;dynp_vars-table_name  ).</item>
       <item/>
       <item>RETURN.</item>
+      <item>CATCH cx_root into DATA(lx_root).</item>
+      <item>&quot;dont want to crash, so catch all catchable exceptions here</item>
+      <item>ENDTRY.</item>
       <item>ENDIF.</item>
      </SOURCE>
     </ENH_HOOK_IMPL>
@@ -81,20 +83,22 @@
      <SPACES>
       <item>0</item>
       <item>3</item>
-      <item>6</item>
+      <item>8</item>
+      <item>0</item>
+      <item>8</item>
+      <item>0</item>
       <item>8</item>
       <item>8</item>
       <item>0</item>
-      <item>3</item>
-      <item>3</item>
+      <item>8</item>
+      <item>10</item>
+      <item>12</item>
+      <item>12</item>
+      <item>12</item>
       <item>0</item>
-      <item>3</item>
-      <item>5</item>
+      <item>8</item>
       <item>7</item>
       <item>7</item>
-      <item>7</item>
-      <item>3</item>
-      <item>0</item>
       <item>3</item>
       <item>1</item>
      </SPACES>
