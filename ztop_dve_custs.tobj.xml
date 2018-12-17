@@ -10,7 +10,7 @@
     <IMPORTABLE>3</IMPORTABLE>
    </OBJH>
    <OBJT>
-    <LANGUAGE>D</LANGUAGE>
+    <LANGUAGE>E</LANGUAGE>
     <OBJECTNAME>ZTOP_DVE_CUST</OBJECTNAME>
     <OBJECTTYPE>S</OBJECTTYPE>
     <DDTEXT>ABAP Debugger Extension - Customizing for Pretty Printer</DDTEXT>

@@ -4,7 +4,9 @@
   <asx:values>
    <DD02V>
     <TABNAME>ZTOP_DVE_CUST</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
     <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>ABAP Debugger Extension - Customizing for Pretty Printer</DDTEXT>
     <MAINFLAG>X</MAINFLAG>
     <CONTFLAG>C</CONTFLAG>
     <EXCLASS>1</EXCLASS>

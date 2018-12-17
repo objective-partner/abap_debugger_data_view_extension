@@ -2,6 +2,7 @@
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
+   <AREAT>Extended Table Maintenance (Generated)</AREAT>
    <INCLUDES>
     <SOBJ_NAME>LZOP_DVE_MAINTENAF00</SOBJ_NAME>
     <SOBJ_NAME>LZOP_DVE_MAINTENAI00</SOBJ_NAME>
