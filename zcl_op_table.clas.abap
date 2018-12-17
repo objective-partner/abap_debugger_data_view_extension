@@ -49,7 +49,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_OP_TABLE IMPLEMENTATION.
+CLASS zcl_op_table IMPLEMENTATION.
 
 
   METHOD add_itab.
@@ -139,8 +139,12 @@ CLASS ZCL_OP_TABLE IMPLEMENTATION.
                                                   i_table        = i_table
                                                   i_table_title  = i_table_title ).
 
-    DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
-
+    TRY.
+        DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
+      CATCH  cx_class_not_existent into data(cx_class_not_existent).
+        "formating went wring, fallback using non formated text
+        formated_content = content_4_display.
+    ENDTRY.
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>display( formated_content ).
 

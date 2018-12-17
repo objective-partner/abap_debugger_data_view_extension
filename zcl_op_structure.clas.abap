@@ -15,9 +15,9 @@ CLASS zcl_op_structure DEFINITION
       "! @parameter i_struc_name | structure name for "name" = VALUE #() statement
       show_popup_w_content
         IMPORTING
-          i_structure     TYPE any
-          i_field_catalog TYPE lvc_t_fcat
-          i_struc_name    TYPE string,
+                  i_structure     TYPE any
+                  i_field_catalog TYPE lvc_t_fcat
+                  i_struc_name    TYPE string,
       "! add a structure to given formated context
       "! @parameter i_current_context | current context as string
       "! @parameter i_structure |  given structure
@@ -215,9 +215,12 @@ CLASS zcl_op_structure IMPLEMENTATION.
     DATA(content_4_display)  = me->prepare_output( i_struc_name = i_struc_name
                                                    i_structure  = i_structure
                                                    i_field_catalog = i_field_catalog ).
-
-    DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
-
+    TRY.
+        DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
+      CATCH  cx_class_not_existent INTO DATA(cx_class_not_existent).
+        "formating went wring, fallback using non formated text
+        formated_content = content_4_display.
+    ENDTRY.
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>display( formated_content ).
   ENDMETHOD.
