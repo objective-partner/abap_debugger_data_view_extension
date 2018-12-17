@@ -2,14 +2,13 @@
 "!VALUE # operator strings
 CLASS zcl_op_value_pretty_printer DEFINITION
   PUBLIC
-  FINAL
-  CREATE PUBLIC .
+  CREATE PRIVATE
+  GLOBAL FRIENDS zcl_op_pretty_printer_factory. "needed for instantiation
 
   PUBLIC SECTION.
-    METHODS:
-      format
-        IMPORTING i_unformated_value_content TYPE string
-        RETURNING VALUE(r_formated_content)  TYPE string.
+    INTERFACES: zif_op_value_pretty_printer.
+    ALIASES: format FOR zif_op_value_pretty_printer~format.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF t_char_offset,
@@ -48,45 +47,6 @@ ENDCLASS.
 
 
 CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
-
-  METHOD format.
-    DATA: last_char(1) TYPE c.
-    r_formated_content = i_unformated_value_content.
-    DATA(reader) = NEW cl_abap_string_c_reader( str = i_unformated_value_content ).
-    DATA(writer) = NEW cl_abap_string_c_writer( ).
-
-
-    WHILE reader->data_available( ) = abap_true.
-      DATA(char) = reader->read( 1 ).
-
-      IF  char EQ | | AND ( last_char EQ |(| OR last_char EQ |)| OR last_char EQ |'| ).
-        clean_up_steering_tab( last_char ).
-        writer->write( |{ c_newline }{ get_spaces( ) }| ).
-      ELSE.
-
-
-        DATA(offset) = COND i(  WHEN char EQ |(| THEN get_offset_in_current_line( writer->get_result_string( ) )
-                                WHEN char EQ |)| THEN get_offset_for_closing_bracket( writer->get_result_string( ) ) "need special handling here as in this case we need the offset of starting ( of it
-                                WHEN last_char IS NOT INITIAL AND char EQ |'| THEN get_offset_for_apostroph( writer->get_result_string( ) )  "need special handling here as in this case we need the offset of starting component of it
-                                ELSE 0 ).
-
-        IF offset > 0.
-          APPEND VALUE #( count = ( lines( steering ) + 1 )
-                          offset_no = offset
-                          char = char ) TO steering.
-        ENDIF.
-
-        writer->write( char ).
-      ENDIF.
-
-      last_char = char.
-    ENDWHILE.
-
-    reader->close( ).
-    writer->close( ).
-
-    r_formated_content = writer->get_result_string( ).
-  ENDMETHOD.
 
   METHOD get_spaces.
     DATA(spaces_no) = steering[ lines( steering ) ]-offset_no.
@@ -160,6 +120,46 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
 
     ENDDO.
 
+  ENDMETHOD.
+
+
+  METHOD zif_op_value_pretty_printer~format.
+    DATA: last_char(1) TYPE c.
+    r_formated_content = i_unformated_value_content.
+    DATA(reader) = NEW cl_abap_string_c_reader( str = i_unformated_value_content ).
+    DATA(writer) = NEW cl_abap_string_c_writer( ).
+
+
+    WHILE reader->data_available( ) = abap_true.
+      DATA(char) = reader->read( 1 ).
+
+      IF  char EQ | | AND ( last_char EQ |(| OR last_char EQ |)| OR last_char EQ |'| ).
+        clean_up_steering_tab( last_char ).
+        writer->write( |{ c_newline }{ get_spaces( ) }| ).
+      ELSE.
+
+
+        DATA(offset) = COND i(  WHEN char EQ |(| THEN get_offset_in_current_line( writer->get_result_string( ) )
+                                WHEN char EQ |)| THEN get_offset_for_closing_bracket( writer->get_result_string( ) ) "need special handling here as in this case we need the offset of starting ( of it
+                                WHEN last_char IS NOT INITIAL AND char EQ |'| THEN get_offset_for_apostroph( writer->get_result_string( ) )  "need special handling here as in this case we need the offset of starting component of it
+                                ELSE 0 ).
+
+        IF offset > 0.
+          APPEND VALUE #( count = ( lines( steering ) + 1 )
+                          offset_no = offset
+                          char = char ) TO steering.
+        ENDIF.
+
+        writer->write( char ).
+      ENDIF.
+
+      last_char = char.
+    ENDWHILE.
+
+    reader->close( ).
+    writer->close( ).
+
+    r_formated_content = writer->get_result_string( ).
   ENDMETHOD.
 
 ENDCLASS.

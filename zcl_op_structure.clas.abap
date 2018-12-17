@@ -1,4 +1,4 @@
-"!This class is offering a API for represent a structure
+"!This class is offering an API for represent a structure
 "!in its ABAP VALUE way: structure_name = VALUE #(...)
 CLASS zcl_op_structure DEFINITION
   PUBLIC
@@ -216,7 +216,7 @@ CLASS zcl_op_structure IMPLEMENTATION.
                                                    i_structure  = i_structure
                                                    i_field_catalog = i_field_catalog ).
 
-    DATA(formated_content) =  NEW zcl_op_value_pretty_printer( )->format( content_4_display ).
+    DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
 
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>display( formated_content ).

@@ -1,4 +1,4 @@
-"!This class is offering a API for represent a table
+"!This class is offering an API for represent a table
 "!in its ABAP VALUE way: table_name = VALUE #( (...) )
 CLASS zcl_op_table DEFINITION
   PUBLIC
@@ -139,7 +139,7 @@ CLASS ZCL_OP_TABLE IMPLEMENTATION.
                                                   i_table        = i_table
                                                   i_table_title  = i_table_title ).
 
-    DATA(formated_content) =  NEW zcl_op_value_pretty_printer( )->format( content_4_display ).
+    DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
 
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>display( formated_content ).
