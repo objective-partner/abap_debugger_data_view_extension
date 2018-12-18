@@ -40,13 +40,18 @@
      <FULL_NAME>\TY:CL_TPDA_TOOL_TABLE_NEW\ME:HANDLE_OK_CODE\SE:BEGIN\EI</FULL_NAME>
      <SOURCE>
       <item>IF i_action EQ &apos;ZD&apos; AND i_subaction EQ &apos;ATA_4_ABAP&apos;.</item>
+      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>TRY.</item>
       <item>TRY.</item>
       <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = dynp_vars-table_name ).</item>
-      <item/>
       <item>DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
-      <item/>
-      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
       <item>ASSIGN zz_reference_to_data-&gt;* TO &lt;zz_table&gt;. &quot;de-referencing</item>
+      <item>CATCH cx_root INTO DATA(lx_root).</item>
+      <item>&quot;could be a header table, try it a different way</item>
+      <item>create_real_clone( IMPORTING e_rda_table = DATA(l_zz_rda_table)</item>
+      <item>e_tab_fcat  = zz_field_catalog ).</item>
+      <item>ASSIGN l_zz_rda_table-&gt;* TO &lt;zz_table&gt;.</item>
+      <item>ENDTRY.</item>
       <item/>
       <item>NEW zcl_op_table( )-&gt;show_popup_w_content(</item>
       <item>EXPORTING</item>
@@ -55,7 +60,7 @@
       <item>i_table_title  =  me-&gt;dynp_vars-table_name  ).</item>
       <item/>
       <item>RETURN.</item>
-      <item>CATCH cx_root into DATA(lx_root).</item>
+      <item>CATCH cx_root INTO lx_root.</item>
       <item>&quot;dont want to crash, so catch all catchable exceptions here</item>
       <item>ENDTRY.</item>
       <item>ENDIF.</item>
@@ -83,12 +88,17 @@
      <SPACES>
       <item>0</item>
       <item>3</item>
-      <item>8</item>
-      <item>0</item>
-      <item>8</item>
-      <item>0</item>
+      <item>3</item>
+      <item>5</item>
       <item>8</item>
       <item>8</item>
+      <item>8</item>
+      <item>5</item>
+      <item>7</item>
+      <item>7</item>
+      <item>36</item>
+      <item>7</item>
+      <item>5</item>
       <item>0</item>
       <item>8</item>
       <item>10</item>

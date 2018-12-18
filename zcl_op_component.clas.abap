@@ -28,13 +28,13 @@ CLASS zcl_op_component DEFINITION
     METHODS:
       "! prepare component name
       "! delete surrounding spaces
-      component_name  IMPORTING i_component_name        TYPE lvc_fname
-                      RETURNING VALUE(r_component_name) TYPE lvc_fname.
+      component_name  IMPORTING i_component_name        TYPE string
+                      RETURNING VALUE(r_component_name) TYPE string.
 ENDCLASS.
 
 
 
-CLASS ZCL_OP_COMPONENT IMPLEMENTATION.
+CLASS zcl_op_component IMPLEMENTATION.
 
 
   METHOD add.
@@ -46,7 +46,9 @@ CLASS ZCL_OP_COMPONENT IMPLEMENTATION.
                                        WHEN i_component_info-datatype EQ |STRU| THEN |{ i_component }|
                                                                                 ELSE | = '{ i_component }'| ).
 
-    DATA(new_column_value_combi) = | { me->component_name( i_component_info-fieldname ) }{ assign_component_value }|.
+    DATA(component_name) = COND string( WHEN i_component_info-seltext <> space AND i_component_info-seltext <> i_component_info-fieldname THEN i_component_info-seltext
+                                                    ELSE  i_component_info-fieldname ).
+    DATA(new_column_value_combi) = | { me->component_name( component_name ) }{ assign_component_value }|.
 
 
     r_current_context = |{ i_current_context }{ new_column_value_combi }|.

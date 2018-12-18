@@ -39,20 +39,26 @@
      <SOURCE>
       <item>CASE e_ucomm.</item>
       <item>WHEN &apos;ZDATA_4_ABAP_VIEW&apos;. &quot;user klicked on Button to display ABAP friendly table data</item>
-      <item>TRY.</item>
-      <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
-      <item/>
-      <item>DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
+      <item>BREAK AGEPPART.</item>
       <item/>
       <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>TRY.</item>
+      <item>TRY.</item>
+      <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
       <item>ASSIGN zz_reference_to_data-&gt;* TO &lt;zz_table&gt;. &quot;de-referencing</item>
+      <item>DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
+      <item>CATCH cx_root INTO DATA(lx_root).</item>
+      <item>&quot;could be a header table, lets try another method</item>
+      <item>ASSIGN me-&gt;rda_table-&gt;* TO &lt;zz_table&gt;. &quot;get current table content</item>
+      <item>zz_field_catalog = me-&gt;tab_fcat.</item>
+      <item>ENDTRY.</item>
       <item/>
       <item>mo_cust_rec-&gt;show_popup_w_content(</item>
       <item>EXPORTING</item>
       <item>i_table        = &lt;zz_table&gt;</item>
       <item>i_table_title  = me-&gt;table</item>
       <item>i_fieldcatalog = zz_field_catalog ).</item>
-      <item>CATCH cx_root into DATA(lx_root).</item>
+      <item>CATCH cx_root INTO lx_root.</item>
       <item>&quot;dont want to crash, so catch all catchable exceptions here</item>
       <item>ENDTRY.</item>
       <item>ENDCASE.</item>
@@ -89,12 +95,18 @@
       <item>2</item>
       <item>6</item>
       <item>7</item>
-      <item>10</item>
       <item>0</item>
-      <item>10</item>
-      <item>0</item>
-      <item>10</item>
-      <item>10</item>
+      <item>7</item>
+      <item>7</item>
+      <item>9</item>
+      <item>12</item>
+      <item>12</item>
+      <item>12</item>
+      <item>9</item>
+      <item>12</item>
+      <item>12</item>
+      <item>12</item>
+      <item>9</item>
       <item>0</item>
       <item>10</item>
       <item>14</item>

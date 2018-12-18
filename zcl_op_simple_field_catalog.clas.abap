@@ -96,12 +96,8 @@ CLASS zcl_op_simple_field_catalog IMPLEMENTATION.
 
 
   METHOD get_fieldcat_from_local_type.
-    DATA: field_catalog TYPE lvc_s_fcat,
-          ddic_field    TYPE dfies.
-
     "in case it is a local itab, structure or element definition
     LOOP AT i_structure_description->get_components( ) INTO DATA(component).
-      CLEAR: field_catalog,  ddic_field.
       CASE component-type->kind.
         WHEN 'E'.
           DATA(element_description) = CAST cl_abap_elemdescr( component-type ).
