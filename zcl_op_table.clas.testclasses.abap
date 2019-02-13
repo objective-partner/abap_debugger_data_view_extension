@@ -12,9 +12,14 @@ CLASS ltc_table_enh_should DEFINITION FOR TESTING
       setup,
       teardown,
       "!check of
-      prepare_ouput_w_1_line_itab FOR TESTING,
-      structure_in_itab           FOR TESTING,
-      itab_in_itab                FOR TESTING.
+      prepare_ouput_w_1_line_itab    FOR TESTING,
+      structure_in_itab              FOR TESTING,
+      itab_in_itab                   FOR TESTING,
+
+      "! ABAP Editor does not support more than 255 lines.
+      "! Issue: https://github.com/objective-partner/abap_debugger_data_view_extension/issues/9
+      "! Real world example is an IDoc structure
+      formatted_line_length_below255 FOR TESTING.
 ENDCLASS.
 
 
@@ -69,9 +74,9 @@ CLASS ltc_table_enh_should IMPLEMENTATION.
            END OF ts_flight_data_deep,
            tt_flight_data_deep TYPE STANDARD TABLE OF ts_flight_data_deep WITH EMPTY KEY.
 
-    DATA:  output         TYPE string,
-           output_exp     TYPE string,
-           sflight_lines  TYPE tt_flight_data_deep.
+    DATA:  output        TYPE string,
+           output_exp    TYPE string,
+           sflight_lines TYPE tt_flight_data_deep.
 
 
     sflight_lines = VALUE #( ( col1 = VALUE #(
@@ -141,6 +146,45 @@ CLASS ltc_table_enh_should IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD formatted_line_length_below255.
 
+    TYPES: BEGIN OF ty_segment,
+             segnam(100) TYPE c,
+             sdata(1000) TYPE c,
+           END OF ty_segment.
+    DATA lt_segments TYPE TABLE OF ty_segment WITH DEFAULT KEY.
+    DATA lt_lines TYPE TABLE OF string WITH DEFAULT KEY.
+
+    lt_segments = VALUE #(
+      (
+      segnam = 'E1EDK01'
+      sdata = |EUREUR1.00000     0021             DE12345678901       DE12345678901       INVO1234561234| &&
+              |                         2.000             2.000             ABCDE                       | &&
+              |                              1112223344               ABCDEDFGHIJKLMNOPQRSTUVWXYZ       | &&
+              |AND STILL SOME MORE CHARACTERS - THERE WILL BE NO END                                    | &&
+              |                               - MAYBE THERE IS AN END IN SIGHT                          |
+      )
+    ).
+
+    DATA(output) = table_view->prepare_output( i_table = lt_segments
+                                               i_table_title = 'EDIDD' ).
+
+    TRY.
+        DATA(formatted) = zcl_op_pretty_printer_factory=>create( )->format( output ).
+
+        SPLIT formatted AT zcl_op_value_pretty_printer=>c_newline INTO TABLE lt_lines.
+
+        DATA(max_length) = 0.
+        LOOP AT lt_lines INTO DATA(line).
+          DATA(length) = strlen( line ).
+          max_length = COND i( WHEN length >= max_length THEN length ELSE max_length ).
+        ENDLOOP.
+
+        cl_abap_unit_assert=>assert_number_between( lower = 0 upper = 255 number = max_length ).
+
+      CATCH cx_class_not_existent.
+    ENDTRY.
+
+  ENDMETHOD.
 
 ENDCLASS.
