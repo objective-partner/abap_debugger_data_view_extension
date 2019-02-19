@@ -39,9 +39,7 @@
      <SOURCE>
       <item>CASE e_ucomm.</item>
       <item>WHEN &apos;ZDATA_4_ABAP_VIEW&apos;. &quot;user klicked on Button to display ABAP friendly table data</item>
-      <item>BREAK AGEPPART.</item>
-      <item/>
-      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE ANY TABLE.</item>
       <item>TRY.</item>
       <item>TRY.</item>
       <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
@@ -94,8 +92,6 @@
      <SPACES>
       <item>2</item>
       <item>6</item>
-      <item>7</item>
-      <item>0</item>
       <item>7</item>
       <item>7</item>
       <item>9</item>
