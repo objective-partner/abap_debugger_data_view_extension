@@ -5,6 +5,10 @@ CLASS zcl_op_value_pretty_printer_2 DEFINITION
 
   PUBLIC SECTION.
     INTERFACES zif_op_value_pretty_printer.
+
+    "! @parameter indent_size | Number of spaces to begin each line with
+    "! @parameter max_line_length | Maximum number of characters for each line. Value has
+    "! to be between 20 and 255 characters (maximum of ABAP editor).
     METHODS constructor
       IMPORTING
         indent_size     TYPE i DEFAULT 2
@@ -18,7 +22,8 @@ CLASS zcl_op_value_pretty_printer_2 DEFINITION
              char(1)        TYPE c,
              level_of_depth TYPE i,
              line_index     TYPE i,
-             position       TYPE i,     "not necessary
+             "block is completed when '(' and ')' for the same group_id exists
+             is_completed   TYPE abap_bool,
            END OF ty_block,
            ty_block_table TYPE SORTED TABLE OF ty_block WITH UNIQUE KEY id,
            ty_lines       TYPE TABLE OF string WITH DEFAULT KEY.
@@ -35,6 +40,7 @@ CLASS zcl_op_value_pretty_printer_2 DEFINITION
     CONSTANTS c_closing_bracket TYPE c VALUE ')'.
     CONSTANTS c_enclosure TYPE c VALUE ''''.
     CONSTANTS c_enclosure_escape TYPE c VALUE ''''.
+    CONSTANTS c_concatenate TYPE c VALUE '&'.
 
     METHODS get_lines_as_string
       RETURNING
@@ -46,23 +52,29 @@ CLASS zcl_op_value_pretty_printer_2 DEFINITION
         i_char TYPE string.
 
     "! Reads component value that is between enclosure characters (respecting enclosure escapes).
-    "! Example: Returns "It''s easy (isn''t it?)" from " 'It''s easy (isn''t it?)' ".
+    "! Example: Returns "It''s easy (isn''t it?)" from "[COL =] 'It''s easy (isn''t it?)' ".
     METHODS read_value_between_enclosures
       RETURNING
         VALUE(r_value) TYPE string.
 
+    "! Splits value into several lines. The length of each line is less than the maximum line size.
+    "! The remaining characters of the first line can be used to fill up the first line.
+    "!
+    "! @parameter i_length_of_first_line | characters already used for the first line
+    "! @parameter i_value | value to split up
+    "! @parameter i_indent_size | number of spaces to begin each line beginning from the second line
     METHODS split_value_at_max_line_length
       IMPORTING
-        i_length       TYPE i
-        i_value        TYPE string
+        i_length_of_first_line TYPE i
+        i_value                TYPE string
+        i_indent_size          TYPE i OPTIONAL
       RETURNING
-        VALUE(r_lines) TYPE ty_lines.
+        VALUE(r_parts)         TYPE ty_lines.
 
     METHODS add_to_block_control
       IMPORTING
         i_char         TYPE string
         i_line_index   TYPE i
-        i_position     TYPE i
       RETURNING
         VALUE(r_block) TYPE ty_block.
 
@@ -85,8 +97,7 @@ CLASS zcl_op_value_pretty_printer_2 DEFINITION
         VALUE(r_group_id) TYPE i.
 
     METHODS append_line.
-
-    METHODS add_indents.
+    METHODS update_indent_of_last_line.
 ENDCLASS.
 
 
@@ -94,60 +105,13 @@ ENDCLASS.
 CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
 
 
-  METHOD add_indents.
-*    TYPES: BEGIN OF ty_group2lines,
-*             group_id         TYPE ty_block-group_id,
-*             line_index_range TYPE RANGE OF ty_block-line_index,
-*           END OF ty_group2lines.
-*    DATA group2lines TYPE SORTED TABLE OF ty_group2lines WITH UNIQUE KEY group_id.
-*    LOOP AT m_blocks INTO DATA(block) GROUP BY block-group_id ASCENDING INTO DATA(groups).
-*      LOOP AT GROUP groups INTO DATA(group).
-*        TRY.
-*            ASSIGN group2lines[ group_id = group-group_id ] TO FIELD-SYMBOL(<group2lines>).
-*            <group2lines>-line_index_range[ 1 ]-low = COND #(
-*              WHEN <group2lines>-line_index_range[ 1 ]-low < group-line_index
-*              THEN <group2lines>-line_index_range[ 1 ]-low
-*              ELSE group-line_index ).
-*            <group2lines>-line_index_range[ 1 ]-high = COND #(
-*              WHEN <group2lines>-line_index_range[ 1 ]-high > group-line_index
-*              THEN 0
-*              ELSE 0
-*            ).
-*          CATCH cx_sy_move_cast_error.
-*            group2lines = VALUE #( BASE group2lines (
-*              group_id = group-group_id
-*              line_index_range = VALUE #( ( sign = 'I' option = 'EQ' low = group-line_index ) )
-*            ) ).
-*        ENDTRY.
-*      ENDLOOP.
-*    ENDLOOP.
-
-    LOOP AT m_lines ASSIGNING FIELD-SYMBOL(<line>).
-      DATA(line_index) = sy-tabix.
-      IF line_exists( m_blocks[ line_index = line_index ] ).
-        DATA(level_of_depth) = m_blocks[ line_index = line_index ]-level_of_depth.
-        DATA(num_spaces) = ( m_indent_size * ( level_of_depth - 1 ) ).
-      ELSE.
-        num_spaces = ( m_indent_size * ( level_of_depth ) ).
-      ENDIF.
-*      DATA(line_index_start) = sy-tabix.
-*      DATA(line_index) = sy-tabix.
-*      WHILE line_index > 0.
-*        "find corresponding block control record
-*        IF line_exists( m_blocks[ line = line_index ] ).
-*          DATA(level_of_depth) = m_blocks[ line = line_index ]-level_of_depth.
-*          DATA(num_spaces) = COND i( WHEN line_index = line_index_start
-*            THEN ( m_indent_size * ( level_of_depth - 1 ) )
-*            ELSE ( m_indent_size * level_of_depth )
-*          ).
-*          DO num_spaces TIMES.
-*            <line> = | { <line> }|.
-*          ENDDO.
-*          EXIT.
-*        ENDIF.
-*        line_index = line_index - 1.
-*      ENDWHILE.
-    ENDLOOP.
+  METHOD constructor.
+    m_indent_size = indent_size.
+    m_max_line_length = COND #(
+      WHEN max_line_length >= 20 AND max_line_length <= 255
+      THEN max_line_length
+      ELSE 128
+    ).
   ENDMETHOD.
 
 
@@ -168,26 +132,35 @@ CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
     "COL2 = '2'           11
     ")                    12
     ").                   13
-    "123456789012345678 Position
 
     "Blocks:
-    "|ID |GR_ID|CHAR|LEVEL|LINE|POS
-    "|1  |1    |(   |1    |1   |12
-    "|2  |2    |(   |2    |3   |15
-    "|3  |2    |)   |2    |7   |1
-    "|4  |3    |(   |2    |9   |15
-    "|5  |3    |)   |2    |12  |1
-    "|6  |1    |)   |1    |13  |1
+    "|ID |GROUP|CHAR|LEVEL|LINE
+    "|1  |1    |(   |1    |1
+    "|2  |2    |(   |2    |3
+    "|3  |2    |)   |2    |7
+    "|4  |3    |(   |2    |9
+    "|5  |3    |)   |2    |12
+    "|6  |1    |)   |1    |13
 
+    "Blocks that belong together have the same group id.
+    "Each block starts with '(' and ends with ')'.
     CHECK i_char = c_opening_bracket
        OR i_char = c_closing_bracket.
 
     block-id = lines( m_blocks ) + 1.
     block-char = i_char.
     block-line_index = i_line_index.
-    block-position = i_position.
     block-level_of_depth = calculate_level_of_depth( i_char ).
     block-group_id = calculate_group_id( i_char ).
+
+    "With the closing bracket, a group of two blocks (with the same group id) is complete.
+    IF i_char = c_closing_bracket.
+      block-is_completed = abap_true.
+      ASSIGN m_blocks[ group_id = block-group_id ] TO FIELD-SYMBOL(<opening_block>).
+      IF sy-subrc = 0.
+        <opening_block>-is_completed = abap_true.
+      ENDIF.
+    ENDIF.
 
     m_blocks = VALUE #( BASE m_blocks ( block ) ).
   ENDMETHOD.
@@ -232,27 +205,32 @@ CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
 
 
   METHOD calculate_indent.
-*    DATA level TYPE ty_block-level_of_depth.
-*    TRY.
-*        IF lines( m_lines ) < 1.
-*          RETURN.
-*        ENDIF.
-*        DATA(last_line) = m_lines[ lines( m_lines ) ].
-*        DATA(last_char_of_last_line) = substring( val = last_line off = strlen( last_line ) - 1 ).
-*
-*        CASE last_char_of_last_line.
-*          WHEN c_enclosure OR c_opening_bracket.
-*            level = m_blocks[ lines( m_blocks ) ]-level_of_depth.
-*          WHEN c_closing_bracket.
-*            level = m_blocks[ lines( m_blocks ) ]-level_of_depth - 1.
-*        ENDCASE.
-*
-*        DATA(lv_num_spaces) = level * m_indent_size.
-*        DO lv_num_spaces TIMES.
-*          r_spaces = |{ r_spaces } |.
-*        ENDDO.
-*      CATCH cx_sy_itab_line_not_found.
-*    ENDTRY.
+    DATA level TYPE ty_block-level_of_depth.
+    IF lines( m_lines ) < 1.
+      RETURN.
+    ENDIF.
+    DATA(last_line) = m_lines[ lines( m_lines ) ].
+    DATA(last_char_of_last_line) = substring( val = last_line off = strlen( last_line ) - 1 ).
+
+    CASE last_char_of_last_line.
+      WHEN c_opening_bracket OR c_closing_bracket.
+        level = m_blocks[ lines( m_blocks ) ]-level_of_depth - 1.
+      WHEN c_enclosure OR c_concatenate.
+        "find latest block that is not completed
+        DATA(block_index) = lines( m_blocks ).
+        WHILE block_index > 0.
+          IF m_blocks[ block_index ]-is_completed = abap_false.
+            level = m_blocks[ block_index ]-level_of_depth.
+            EXIT.
+          ENDIF.
+          block_index = block_index - 1.
+        ENDWHILE.
+    ENDCASE.
+
+    DATA(lv_num_spaces) = level * m_indent_size.
+    DO lv_num_spaces TIMES.
+      r_spaces = |{ r_spaces } |.
+    ENDDO.
   ENDMETHOD.
 
 
@@ -275,16 +253,6 @@ CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD constructor.
-    m_indent_size = indent_size.
-    m_max_line_length = COND #(
-      WHEN max_line_length > 0 AND max_line_length <= 255
-      THEN max_line_length
-      ELSE 128
-    ).
-  ENDMETHOD.
-
-
   METHOD get_lines_as_string.
     DATA(writer) = NEW cl_abap_string_c_writer( ).
 
@@ -301,19 +269,26 @@ CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
 
 
   METHOD handle_char.
+    FIELD-SYMBOLS <last_line> LIKE LINE OF m_lines.
+
     "Skip blanks between brackets and components
-    IF m_line CO space AND i_char CO space.       "eq space does not work
+    IF m_line CO space AND i_char CO space.       "EQ space does not work
       RETURN.
     ENDIF.
 
     IF i_char = c_enclosure.
       DATA(value) = read_value_between_enclosures( ).
-      IF strlen( m_line ) + strlen( value ) < m_max_line_length.
-        m_line = m_line && value.
+      DATA(parts) = split_value_at_max_line_length(
+        EXPORTING
+          i_length_of_first_line = strlen( m_line )         "to fill up current line
+          i_value  = value
+          i_indent_size = strlen( calculate_indent( ) )     "indent size needed for split calculation
+      ).
+      LOOP AT parts INTO DATA(part).
+        m_line = m_line && part.
         append_line( ).
-      ELSE.
-        "TODO line breaks
-      ENDIF.
+        update_indent_of_last_line( ).
+      ENDLOOP.
       RETURN.
     ENDIF.
 
@@ -321,45 +296,63 @@ CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
 
     IF i_char = c_opening_bracket
     OR i_char = c_closing_bracket.
-      append_line( ).
-      add_to_block_control(
+      append_line( ).                          "append line first
+      add_to_block_control(                    "block control expects that line is appended
         i_char = i_char
-        i_line_index = lines( m_lines )
-        i_position = strlen( m_line ) ).
+        i_line_index = lines( m_lines ) ).
+      update_indent_of_last_line( ).           "indent calculation requires block control
     ENDIF.
+
   ENDMETHOD.
 
 
   METHOD read_value_between_enclosures.
     DATA char TYPE string.
-    TRY.
-        DATA(value) = | { c_enclosure }|.
-        DO.
-          char = m_reader->read( 1 ).
-          value = value && char.
-          "^[ ]['](.*)['][ ]$ extracts value only
-          "^[ ](['].*['])[ ]$ extracts value surrounded by enclosures
-          DATA(matcher) = cl_abap_matcher=>create(
-           EXPORTING
-             pattern = |^[ ]([{ c_enclosure }].*[{ c_enclosure }])[ ]$|
-             text    = value
-          ).
-          IF matcher->match( ) = abap_true.
-            r_value = matcher->get_submatch( 1 ).
-            RETURN.
-          ENDIF.
-        ENDDO.
-      CATCH cx_sy_regex.
-      CATCH cx_sy_matcher.
-    ENDTRY.
+    DATA(value) = | { c_enclosure }|.
+    DO.
+      char = m_reader->read( 1 ).
+      value = value && char.
+      "^[ ](['].*['])[ ]$ extracts value surrounded by enclosures
+      "^[ ]['](.*)['][ ]$ extracts value only
+      DATA(matcher) = cl_abap_matcher=>create(
+       EXPORTING
+         pattern = |^[ ]([{ c_enclosure }].*[{ c_enclosure }])[ ]$|
+         text    = value
+      ).
+      IF matcher->match( ) = abap_true.
+        r_value = matcher->get_submatch( 1 ).
+        RETURN.
+      ENDIF.
+    ENDDO.
   ENDMETHOD.
 
 
   METHOD split_value_at_max_line_length.
-    IF i_length + strlen( i_value ) <= m_max_line_length.
+    "#TODO Don't break line between escape and enclosure.
+    DATA part TYPE string.
+    "if max length is not exceeded, just return input value.
+    IF i_length_of_first_line + strlen( i_value ) <= m_max_line_length.
+      r_parts = VALUE #( BASE r_parts ( i_value ) ).
       RETURN.
     ENDIF.
 
+    DATA(lo_reader) = NEW cl_abap_string_c_reader( str = i_value ).
+    DATA(max_length) = m_max_line_length - i_length_of_first_line.  "first line is shorter
+    WHILE lo_reader->data_available( ) = abap_true.
+      IF strlen( part ) = ( max_length - i_indent_size - 4 ).  "4 chars for closing enclosure, space and &&
+        r_parts = VALUE #( BASE r_parts ( |{ part }{ c_enclosure } { c_concatenate }{ c_concatenate }| ) ).
+        part = |{ c_enclosure }|.           "starting with indent and a opening enclosure
+        DO i_indent_size TIMES.
+          part = | { part }|.
+        ENDDO.
+        max_length = m_max_line_length.     "full line length beginning at 2nd line
+      ENDIF.
+      part = part && lo_reader->read( 1 ).
+    ENDWHILE.
+    lo_reader->close( ).
+    IF part IS NOT INITIAL.
+      r_parts = VALUE #( BASE r_parts ( |{ part }| ) ).
+    ENDIF.
   ENDMETHOD.
 
 
@@ -372,11 +365,14 @@ CLASS zcl_op_value_pretty_printer_2 IMPLEMENTATION.
       handle_char( char ).
     ENDWHILE.
     m_reader->close( ).
-    "VALUE has to end with a dot.     #TODO: unformatted value content should contain the dot.
-    ASSIGN m_lines[ lines( m_lines ) ] TO FIELD-SYMBOL(<last_line>).
-    <last_line> = |{ <last_line> }.|.
 
-    add_indents( ).
     r_formated_content = get_lines_as_string( ).
   ENDMETHOD.
+
+  METHOD update_indent_of_last_line.
+    ASSIGN m_lines[ lines( m_lines ) ] TO FIELD-SYMBOL(<last_line>).
+    CONDENSE <last_line>.
+    <last_line> = |{ calculate_indent( ) }{ <last_line> }|.
+  ENDMETHOD.
+
 ENDCLASS.
