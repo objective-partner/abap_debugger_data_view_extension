@@ -30,12 +30,10 @@ ENDCLASS.
 
 
 
-CLASS ZCL_OP_PRETTY_PRINTER_FACTORY IMPLEMENTATION.
+CLASS zcl_op_pretty_printer_factory IMPLEMENTATION.
 
 
   METHOD create.
-
-    DATA: lo_pretty_printer TYPE REF TO zif_op_value_pretty_printer.
 
     IF pretty_printer IS NOT BOUND.
 
@@ -44,10 +42,7 @@ CLASS ZCL_OP_PRETTY_PRINTER_FACTORY IMPLEMENTATION.
 
       classname_to_use = COND #( WHEN is_given_class_an_active_impl( classname_to_use ) EQ abap_true THEN classname_to_use ELSE |ZCL_OP_VALUE_PRETTY_PRINTER| ).
 
-      CREATE OBJECT lo_pretty_printer TYPE (classname_to_use).
-
-      "instantiate the found one
-      pretty_printer = NEW zcl_op_value_pretty_printer( ).
+      CREATE OBJECT pretty_printer TYPE (classname_to_use).
     ENDIF.
 
     r_pretty_printer = pretty_printer.
@@ -69,6 +64,7 @@ CLASS ZCL_OP_PRETTY_PRINTER_FACTORY IMPLEMENTATION.
 
 
   METHOD get_customizing_for_given_user.
+    read_customizing( ).
     CHECK line_exists( user_class_customizing[ user_name = sy-uname ] ).
     r_customizing = user_class_customizing[ user_name = sy-uname ]-class_name.
   ENDMETHOD.
