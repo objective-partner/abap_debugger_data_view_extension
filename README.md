@@ -3,7 +3,7 @@ Extensions to abap debugger to be able to view itab and structure data in a abap
 
 For details see </br>
 https://blogs.sap.com/2017/12/17/abap-debugger-enhancement-or-how-to-speed-up-your-test-data-creation-process/
-and </br>
+ </br> and </br>
 https://blogs.sap.com/2019/02/22/abap-debugger-enhancement-update/
 
 
