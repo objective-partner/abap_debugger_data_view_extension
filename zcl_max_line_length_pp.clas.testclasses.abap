@@ -19,7 +19,7 @@ CLASS ltcl_pretty_printer_should DEFINITION FINAL FOR TESTING
       break_line_if_length_less_20 FOR TESTING RAISING cx_static_check,
       max_line_length_less_128 FOR TESTING RAISING cx_static_check,
 
-      "!calls to pritty printer should be idempotent
+      "!calls to pretty printer should be idempotent
       clear_last_result FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
@@ -98,27 +98,57 @@ CLASS ltcl_pretty_printer_should IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD max_line_length_less_128.
-    DATA lt_lines TYPE TABLE OF string.
+    DATA lines_actual TYPE TABLE OF string.
+    DATA lines_expected TYPE TABLE OF string.
 
     "GIVEN
-    cut = NEW #( indent_size = 5 max_line_length = 128 ).
+    cut = NEW #( indent_size = 2 max_line_length = 128 ).
     DATA(input) = |EDIDD = VALUE #( ( SEGNAM = 'E1EDK01' SDATA = 'EUREUR1.00000     0021             DE12345678901       DE12345678901       INVO1234561234| &&
                   |                         2.000             2.000             ABCDE                                                  1112223344          | &&
                   |     ABCDEDFGHIJKLMNOPQRSTUVWXYZ       AND STILL SOME MORE CHARACTERS - THERE WILL BE NO END                                            | &&
                   |                       - MAYBE THERE IS AN END IN SIGHT' ) ).|.
+    DATA(expected) = |EDIDD = VALUE #(\r| &&
+                     |  (\r    SEGNAM = 'E1EDK01'\r| &&
+                     |    SDATA = 'EUREUR1.00000     0021             DE12345678901       DE12345678901       INVO1234561234                      ' &&\r| &&
+                     |    '   2.000             2.000             ABCDE                                                  1112223344               ' &&\r| &&
+                     |    'ABCDEDFGHIJKLMNOPQRSTUVWXYZ       AND STILL SOME MORE CHARACTERS - THERE WILL BE NO END                                ' &&\r| &&
+                     |    '                                   - MAYBE THERE IS AN END IN SIGHT'\r| &&
+                     |  )\r)|.
+    lines_expected = VALUE #(
+      ( |EDIDD = VALUE #(| )
+      ( |  (| )
+      ( |    SEGNAM = 'E1EDK01'| )
+      ( |    SDATA = 'EUREUR1.00000     0021             DE12345678901       DE12345678901       INVO1234561234                      ' &&| )
+      ( |    '   2.000             2.000             ABCDE                                                  1112223344               ' &&| )
+      ( |    'ABCDEDFGHIJKLMNOPQRSTUVWXYZ       AND STILL SOME MORE CHARACTERS - THERE WILL BE NO END                                ' &&| )
+      ( |    '                                   - MAYBE THERE IS AN END IN SIGHT'| )
+      ( |  )| )
+      ( |)| )
+    ).
+    "EDIDD = VALUE #(
+    "  (
+    "    SEGNAM = 'E1EDK01'
+    "    SDATA = 'EUREUR1.00000     0021             DE12345678901       DE12345678901       INVO1234561234                      ' &&
+    "    '   2.000             2.000             ABCDE                                                  1112223344               ' &&
+    "    'ABCDEDFGHIJKLMNOPQRSTUVWXYZ       AND STILL SOME MORE CHARACTERS - THERE WILL BE NO END                                ' &&
+    "    '                                   - MAYBE THERE IS AN END IN SIGHT'
+    "  )
+    ")
 
     "WHEN
     DATA(formated_string) = cut->format( input ).
 
-    SPLIT formated_string AT zcl_max_line_length_pp=>c_newline INTO TABLE lt_lines.
+    SPLIT formated_string AT zcl_max_line_length_pp=>c_newline INTO TABLE lines_actual.
     DATA(max_length) = 0.
-    LOOP AT lt_lines INTO DATA(line).
+    LOOP AT lines_actual INTO DATA(line).
       DATA(length) = strlen( line ).
       max_length = COND i( WHEN length >= max_length THEN length ELSE max_length ).
     ENDLOOP.
 
     "THEN
     cl_abap_unit_assert=>assert_number_between( lower = 2 upper = 128 number = max_length ).
+    cl_abap_unit_assert=>assert_equals( act = lines_actual     exp = lines_expected ).
+    cl_abap_unit_assert=>assert_equals( act = formated_string  exp = expected ).
 
   ENDMETHOD.
 
