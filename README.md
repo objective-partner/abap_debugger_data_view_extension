@@ -7,3 +7,6 @@ https://blogs.sap.com/2017/12/17/abap-debugger-enhancement-or-how-to-speed-up-yo
 https://blogs.sap.com/2019/02/22/abap-debugger-enhancement-update/
 
 
+Follow this link for a german description of this extension:
+https://www.objective-partner.de/abap-debugger-erweiterung/
+
