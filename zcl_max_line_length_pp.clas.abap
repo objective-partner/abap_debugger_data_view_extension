@@ -346,9 +346,9 @@ CLASS zcl_max_line_length_pp IMPLEMENTATION.
     ENDIF.
 
     DATA(lo_reader) = NEW cl_abap_string_c_reader( str = i_value ).
-    DATA(max_length) = m_max_line_length - i_length_of_first_line.  "first line is shorter
+    DATA(max_length) = m_max_line_length - i_length_of_first_line - i_indent_size.  "first line is shorter
     WHILE lo_reader->data_available( ) = abap_true.
-      IF strlen( part ) = ( max_length - i_indent_size - 4 ).  "4 chars for closing enclosure, space and &&
+      IF strlen( part ) = ( max_length - 4 ).  "4 chars for closing enclosure, space and &&
         APPEND |{ part }{ c_enclosure } { c_concatenate }{ c_concatenate }| TO r_parts.
         part = |{ c_enclosure }|.           "starting with indent and a opening enclosure
         DO i_indent_size TIMES.
@@ -367,7 +367,7 @@ CLASS zcl_max_line_length_pp IMPLEMENTATION.
 
   METHOD update_indent_of_last_line.
     ASSIGN m_lines[ lines( m_lines ) ] TO FIELD-SYMBOL(<last_line>).
-    CONDENSE <last_line>.
+    SHIFT <last_line> LEFT DELETING LEADING space.
     <last_line> = |{ calculate_indent( ) }{ <last_line> }|.
   ENDMETHOD.
 
