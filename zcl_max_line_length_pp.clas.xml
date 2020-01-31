@@ -4,7 +4,6 @@
   <asx:values>
    <VSEOCLASS>
     <CLSNAME>ZCL_MAX_LINE_LENGTH_PP</CLSNAME>
-    <VERSION>1</VERSION>
     <LANGU>E</LANGU>
     <DESCRIPT>Pretty Printer for VALUE with compression</DESCRIPT>
     <STATE>1</STATE>

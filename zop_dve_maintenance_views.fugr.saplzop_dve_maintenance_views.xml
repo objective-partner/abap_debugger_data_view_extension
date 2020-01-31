@@ -4,8 +4,6 @@
   <asx:values>
    <PROGDIR>
     <NAME>SAPLZOP_DVE_MAINTENANCE_VIEWS</NAME>
-    <STATE>A</STATE>
-    <VARCL>X</VARCL>
     <DBAPL>S</DBAPL>
     <DBNA>D$</DBNA>
     <SUBC>F</SUBC>

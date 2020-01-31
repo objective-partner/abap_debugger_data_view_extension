@@ -4,8 +4,6 @@
   <asx:values>
    <PROGDIR>
     <NAME>SAPLZOP_DVE_MAINTENA</NAME>
-    <STATE>A</STATE>
-    <SQLX>X</SQLX>
     <DBAPL>S</DBAPL>
     <DBNA>D$</DBNA>
     <SUBC>F</SUBC>

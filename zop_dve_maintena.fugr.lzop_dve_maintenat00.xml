@@ -4,9 +4,9 @@
   <asx:values>
    <PROGDIR>
     <NAME>LZOP_DVE_MAINTENAT00</NAME>
-    <STATE>A</STATE>
     <SUBC>I</SUBC>
     <RLOAD>E</RLOAD>
+    <UCCHECK>X</UCCHECK>
    </PROGDIR>
   </asx:values>
  </asx:abap>
