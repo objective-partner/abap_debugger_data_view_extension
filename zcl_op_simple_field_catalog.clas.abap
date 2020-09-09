@@ -118,11 +118,16 @@ CLASS zcl_op_simple_field_catalog IMPLEMENTATION.
                                      outputlen  = element_description->output_length ) TO r_field_catalog.
           ENDIF.
         WHEN 'S'.
-          DATA(structure_description) = CAST cl_abap_structdescr( component-type ).
-          APPEND VALUE lvc_s_fcat( fieldname  = component-name
-                                   seltext    = component-name
-                                   inttype    = structure_description->type_kind
-                                   datatype   = |STRU| ) TO r_field_catalog.
+          if component-as_include = abap_true.
+            data(lt_aux) = me->get_fieldcat_from_local_type( i_structure_description = cast #( component-type ) ).
+            append lines of lt_aux to r_field_catalog.
+          else.
+            DATA(structure_description) = CAST cl_abap_structdescr( component-type ).
+            APPEND VALUE lvc_s_fcat( fieldname  = component-name
+                                     seltext    = component-name
+                                     inttype    = structure_description->type_kind
+                                     datatype   = |STRU| ) TO r_field_catalog.
+          endif.
         WHEN 'T'.
           DATA(table_description) = CAST cl_abap_tabledescr( component-type ).
           APPEND VALUE #(  fieldname = component-name
