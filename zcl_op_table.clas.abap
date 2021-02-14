@@ -65,12 +65,14 @@ CLASS zcl_op_table IMPLEMENTATION.
 
         r_current_context = COND string( WHEN i_current_context IS NOT INITIAL THEN i_current_context ELSE || ).
 
+        DATA(line_num) = 0.
         LOOP AT i_table ASSIGNING FIELD-SYMBOL(<table_line>).
 
+          ADD 1 TO line_num.
           r_current_context = me->add_prefix(  i_current_context = r_current_context
                                                i_table_title     = i_table_title
                                                i_component_name  = i_component_name
-                                               i_tabix           = sy-tabix ).
+                                               i_tabix           = line_num ).
           "print columns
           LOOP AT field_catalog INTO DATA(field_info).
             IF lines( field_catalog ) = 1 AND field_catalog[ 1 ]-fieldname IS INITIAL.

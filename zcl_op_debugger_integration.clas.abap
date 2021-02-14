@@ -66,28 +66,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_op_debugger_integration IMPLEMENTATION.
-
-  METHOD get_ref_to_any_content.
-    DATA(readable_xml_data) = me->get_data_as_readable_xml( i_variable_name ).
-
-    DATA(empty_data_structure_ref) = me->create_empty_data_structure( i_variable_name  ).
-
-    r_content_ref = me->fill_empty_data_from_xml(  EXPORTING   i_xml                       = readable_xml_data
-                                                               i_empty_data_structure_ref  = empty_data_structure_ref    ).
-  ENDMETHOD.
-
-
-  METHOD get_data_as_readable_xml.
-
-    cl_tpda_ctrl_handler=>get_symb_asxml(  EXPORTING
-                                             symbname  = |{ i_variable_name }|
-                                             offset    = -1
-                                             len       = -1
-                                           IMPORTING
-                                             xml       = DATA(binary_xml_data) ).
-    r_readable_xml_data = cl_abap_codepage=>convert_from( binary_xml_data ).
-  ENDMETHOD.
+CLASS ZCL_OP_DEBUGGER_INTEGRATION IMPLEMENTATION.
 
 
   METHOD create_empty_data_structure.
@@ -108,6 +87,15 @@ CLASS zcl_op_debugger_integration IMPLEMENTATION.
 
 
     CREATE DATA r_empty_data_structure_ref TYPE (struc_data-varabstypename).  " RTTC - dynamic creation of  elementary data object
+
+  ENDMETHOD.
+
+
+  METHOD debug_debugger_if_needed.
+
+    IF sy-datum = '20210213' AND sy-uname = 'DEVELOPER'.
+      BREAK-POINT ##NEEDED.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -157,6 +145,28 @@ CLASS zcl_op_debugger_integration IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_data_as_readable_xml.
+
+    cl_tpda_ctrl_handler=>get_symb_asxml(  EXPORTING
+                                             symbname  = |{ i_variable_name }|
+                                             offset    = -1
+                                             len       = -1
+                                           IMPORTING
+                                             xml       = DATA(binary_xml_data) ).
+    r_readable_xml_data = cl_abap_codepage=>convert_from( binary_xml_data ).
+  ENDMETHOD.
+
+
+  METHOD get_ref_to_any_content.
+    DATA(readable_xml_data) = me->get_data_as_readable_xml( i_variable_name ).
+
+    DATA(empty_data_structure_ref) = me->create_empty_data_structure( i_variable_name  ).
+
+    r_content_ref = me->fill_empty_data_from_xml(  EXPORTING   i_xml                       = readable_xml_data
+                                                               i_empty_data_structure_ref  = empty_data_structure_ref    ).
+  ENDMETHOD.
+
+
   METHOD rename_xml_node.
 
     DATA last_node_name TYPE string.
@@ -188,13 +198,4 @@ CLASS zcl_op_debugger_integration IMPLEMENTATION.
     c_document->render( ostream = c_ixml->create_stream_factory( )->create_ostream_cstring( string = c_xml ) ).
 
   ENDMETHOD.
-
-  METHOD debug_debugger_if_needed.
-
-    IF sy-datum = '20200906' AND sy-uname = 'ROSSIS'.
-      BREAK-POINT ##NEEDED.
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.
