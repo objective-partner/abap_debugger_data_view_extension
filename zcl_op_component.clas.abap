@@ -38,20 +38,51 @@ CLASS zcl_op_component IMPLEMENTATION.
 
 
   METHOD add.
+    DATA type TYPE REF TO cl_abap_typedescr.
+
     r_current_context = i_current_context.
 
     CHECK i_component IS NOT INITIAL AND i_component_info-fieldname NE |INDEX|.
 
-    DATA(assign_component_value) = COND #( WHEN i_component_info-datatype EQ |TTYP| THEN | = { i_component }|
-                                       WHEN i_component_info-datatype EQ |STRU| THEN |{ i_component }|
-                                                                                ELSE | = '{ i_component }'| ).
+*    DATA(assign_component_value) = COND #(
+*                WHEN i_component_info-datatype EQ |TTYP| THEN | = { i_component }|
+*                WHEN i_component_info-datatype EQ |STRU| THEN |{ i_component }|
+*                ELSE | = '{ i_component }'| ).
+    DATA(assign_component_value) = SWITCH #( i_component_info-inttype
+                WHEN type->typekind_int1
+                  OR type->typekind_int2
+                  OR type->typekind_int
+                  OR type->typekind_int8
+                THEN condense( |{ i_component }| )
+                WHEN type->typekind_struct1
+                  OR type->typekind_struct2
+                  OR type->typekind_table
+                THEN i_component
+                WHEN type->typekind_string
+                THEN |`{ replace( val = i_component sub = |`| with = |``| occ = 0 ) }`|
+                ELSE |'{ replace( val = i_component sub = |'| with = |''| occ = 0 ) }'| ).
 
-    DATA(component_name) = COND string( WHEN i_component_info-seltext <> space AND i_component_info-seltext <> i_component_info-fieldname THEN i_component_info-seltext
-                                                    ELSE  i_component_info-fieldname ).
-    DATA(new_column_value_combi) = | { me->component_name( component_name ) }{ assign_component_value }|.
+    IF i_component_info-fieldname IS NOT INITIAL.
+
+      DATA(component_name) = COND string( WHEN i_component_info-seltext <> space
+                                              AND i_component_info-seltext <> i_component_info-fieldname
+                                          THEN i_component_info-seltext
+                                          ELSE i_component_info-fieldname ).
+
+      DATA(new_column_value_combi) = | { me->component_name( component_name )
+                                       }{ COND #( WHEN i_component_info-datatype <> |STRU| THEN | = | )
+                                       }{ assign_component_value }|.
+
+      r_current_context = |{ i_current_context }{ new_column_value_combi }|.
+
+    ELSE.
+
+      " Line type of table has NO component (like a table of integers: DATA itab TYPE TABLE OF i)
+      r_current_context = | { assign_component_value }|.
+
+    ENDIF.
 
 
-    r_current_context = |{ i_current_context }{ new_column_value_combi }|.
 
   ENDMETHOD.
 

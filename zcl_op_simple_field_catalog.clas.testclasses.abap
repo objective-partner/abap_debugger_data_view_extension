@@ -11,7 +11,8 @@ CLASS ltcl_fieldcatalog_should DEFINITION FINAL FOR TESTING
     METHODS:
       setup,
       get_fields_in_right_order         FOR TESTING RAISING cx_static_check,
-      get_fieldcatalog_of_local_type    FOR TESTING RAISING cx_static_check.
+      get_fieldcatalog_of_local_type    FOR TESTING RAISING cx_static_check,
+      get_fieldcatalog_nostruc_table FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -103,6 +104,20 @@ CLASS ltcl_fieldcatalog_should IMPLEMENTATION.
                         ).
 
     DATA(lt_field_catalog)  = lo_cut->get_by_data( i_table = flights ).
+
+    cl_abap_unit_assert=>assert_not_initial(  EXPORTING   act     = lt_field_catalog[]
+                                                          msg     = |Field catalog was not created|         ).
+
+  ENDMETHOD.
+
+  METHOD get_fieldcatalog_nostruc_table.
+
+    TYPES: tt_nostruc TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+
+
+    DATA(table) = VALUE tt_nostruc( ( 1 ) ( 2 ) ( 3 ) ).
+
+    DATA(lt_field_catalog)  = lo_cut->get_by_data( i_table = table ).
 
     cl_abap_unit_assert=>assert_not_initial(  EXPORTING   act     = lt_field_catalog[]
                                                           msg     = |Field catalog was not created|         ).

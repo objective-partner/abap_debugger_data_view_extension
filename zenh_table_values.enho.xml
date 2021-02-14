@@ -18,14 +18,14 @@
      <ENHMODE>D</ENHMODE>
      <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\TY:LCL_TAB\ME:INIT_ALV\SE:END\EI</FULL_NAME>
      <SOURCE>
-      <item>&quot;instantiate custom event reciever</item>
-      <item>mo_cust_rec  = NEW zcl_op_table( ).</item>
+      <item>   &quot;instantiate custom event reciever</item>
+      <item>   mo_cust_rec  = NEW zcl_op_table( ).</item>
       <item/>
-      <item>&quot;set reciever as handler for Debugger Table ALV</item>
-      <item>SET HANDLER mo_cust_rec-&gt;handle_toolbar_set  FOR me-&gt;ref_alv.</item>
+      <item>   &quot;set reciever as handler for Debugger Table ALV</item>
+      <item>   SET HANDLER mo_cust_rec-&gt;handle_toolbar_set  FOR me-&gt;ref_alv.</item>
       <item/>
-      <item>&quot; need to refresh alv here</item>
-      <item>refresh_alv( ).</item>
+      <item>   &quot; need to refresh alv here</item>
+      <item>   refresh_alv( ).</item>
      </SOURCE>
     </ENH_HOOK_IMPL>
     <ENH_HOOK_IMPL>
@@ -33,29 +33,30 @@
      <ENHMODE>D</ENHMODE>
      <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\TY:LCL_TAB\ME:HANDLE_USER_COMMAND\SE:BEGIN\EI</FULL_NAME>
      <SOURCE>
-      <item>CASE e_ucomm.</item>
-      <item>WHEN &apos;ZDATA_4_ABAP_VIEW&apos;. &quot;user klicked on Button to display ABAP friendly table data</item>
-      <item>FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
-      <item>TRY.</item>
-      <item>TRY.</item>
-      <item>DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
-      <item>ASSIGN zz_reference_to_data-&gt;* TO &lt;zz_table&gt;. &quot;de-referencing</item>
-      <item>DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
-      <item>CATCH cx_root INTO DATA(lx_root).</item>
-      <item>&quot;could be a header table, lets try another method</item>
-      <item>ASSIGN me-&gt;rda_table-&gt;* TO &lt;zz_table&gt;. &quot;get current table content</item>
-      <item>zz_field_catalog = me-&gt;tab_fcat.</item>
-      <item>ENDTRY.</item>
+      <item>  CASE e_ucomm.</item>
+      <item>      WHEN &apos;ZDATA_4_ABAP_VIEW&apos;. &quot;user klicked on Button to display ABAP friendly table data</item>
+      <item>       FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>       zcl_op_debugger_integration=&gt;debug_debugger_if_needed( ).</item>
+      <item>       TRY.</item>
+      <item>         TRY.</item>
+      <item>            DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
+      <item>            ASSIGN zz_reference_to_data-&gt;* TO &lt;zz_table&gt;. &quot;de-referencing</item>
+      <item>            DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )-&gt;get_by_reference( zz_reference_to_data ).</item>
+      <item>         CATCH cx_root INTO DATA(lx_root).</item>
+      <item>            &quot;could be a header table, lets try another method</item>
+      <item>            ASSIGN me-&gt;rda_table-&gt;* TO &lt;zz_table&gt;. &quot;get current table content</item>
+      <item>            zz_field_catalog = me-&gt;tab_fcat.</item>
+      <item>         ENDTRY.</item>
       <item/>
-      <item>mo_cust_rec-&gt;show_popup_w_content(</item>
-      <item>EXPORTING</item>
-      <item>i_table        = &lt;zz_table&gt;</item>
-      <item>i_table_title  = me-&gt;table</item>
-      <item>i_fieldcatalog = zz_field_catalog ).</item>
-      <item>CATCH cx_root INTO lx_root.</item>
-      <item>&quot;dont want to crash, so catch all catchable exceptions here</item>
-      <item>ENDTRY.</item>
-      <item>ENDCASE.</item>
+      <item>          mo_cust_rec-&gt;show_popup_w_content(</item>
+      <item>              EXPORTING</item>
+      <item>                i_table        = &lt;zz_table&gt;</item>
+      <item>                i_table_title  = me-&gt;table</item>
+      <item>                i_fieldcatalog = zz_field_catalog ).</item>
+      <item>         CATCH cx_root INTO lx_root.</item>
+      <item>           &quot;dont want to crash, so catch all catchable exceptions here</item>
+      <item>       ENDTRY.</item>
+      <item>  ENDCASE.</item>
      </SOURCE>
     </ENH_HOOK_IMPL>
     <ENH_HOOK_IMPL>
@@ -63,59 +64,40 @@
      <ENHMODE>S</ENHMODE>
      <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\IC:LSTPDA_TABLE_VALUESTOP\SE:END\EI</FULL_NAME>
      <SOURCE>
-      <item>DATA: mo_cust_rec TYPE REF TO zcl_op_table.</item>
+      <item> DATA: mo_cust_rec TYPE REF TO zcl_op_table.</item>
      </SOURCE>
     </ENH_HOOK_IMPL>
    </ENHANCEMENTS>
-   <SPACES>
+   <SOTR>
     <item>
-     <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\TY:LCL_TAB\ME:INIT_ALV\SE:END\EI</FULL_NAME>
-     <SPACES>
-      <item>3</item>
-      <item>3</item>
-      <item>0</item>
-      <item>3</item>
-      <item>3</item>
-      <item>0</item>
-      <item>3</item>
-      <item>3</item>
-     </SPACES>
+     <HEADER>
+      <CONCEPT>000D3A46373D1EDA9BA13BBAE94A5A1A</CONCEPT>
+      <CREA_LAN>E</CREA_LAN>
+      <TRALA_TYPE>1</TRALA_TYPE>
+      <OBJID_VEC>AAI=</OBJID_VEC>
+     </HEADER>
+     <ENTRIES>
+      <SOTR_TEXT>
+       <CONCEPT>000D3A46373D1EDA9BA13BBAE94A5A1A</CONCEPT>
+       <LANGU>E</LANGU>
+       <LFD_NUM>0001</LFD_NUM>
+       <FLAG_CNTXT>X</FLAG_CNTXT>
+       <STATUS>R</STATUS>
+       <LENGTH>056</LENGTH>
+       <TEXT>Erweiterung des ALVs im ABAP Debugger</TEXT>
+      </SOTR_TEXT>
+     </ENTRIES>
     </item>
-    <item>
-     <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\TY:LCL_TAB\ME:HANDLE_USER_COMMAND\SE:BEGIN\EI</FULL_NAME>
-     <SPACES>
-      <item>2</item>
-      <item>6</item>
-      <item>7</item>
-      <item>7</item>
-      <item>9</item>
-      <item>12</item>
-      <item>12</item>
-      <item>12</item>
-      <item>9</item>
-      <item>12</item>
-      <item>12</item>
-      <item>12</item>
-      <item>9</item>
-      <item>0</item>
-      <item>10</item>
-      <item>14</item>
-      <item>16</item>
-      <item>16</item>
-      <item>16</item>
-      <item>9</item>
-      <item>11</item>
-      <item>7</item>
-      <item>2</item>
-     </SPACES>
-    </item>
-    <item>
-     <FULL_NAME>\PR:SAPLSTPDA_TABLE_VALUES\IC:LSTPDA_TABLE_VALUESTOP\SE:END\EI</FULL_NAME>
-     <SPACES>
-      <item>1</item>
-     </SPACES>
-    </item>
-   </SPACES>
+   </SOTR>
+   <SOTR_USE>
+    <SOTR_USE>
+     <PGMID>R3TR</PGMID>
+     <OBJECT>ENHO</OBJECT>
+     <OBJ_NAME>ZENH_TABLE_VALUES</OBJ_NAME>
+     <CONCEPT>000D3A46373D1EDA9BA13BBAE94A5A1A</CONCEPT>
+     <LFD_NUM>0001</LFD_NUM>
+    </SOTR_USE>
+   </SOTR_USE>
   </asx:values>
  </asx:abap>
 </abapGit>

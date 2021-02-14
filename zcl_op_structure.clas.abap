@@ -222,7 +222,8 @@ CLASS zcl_op_structure IMPLEMENTATION.
         formated_content = content_4_display.
     ENDTRY.
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
-    cl_demo_output=>display( formated_content ).
+    cl_demo_output=>write_data( formated_content ).
+    cl_demo_output=>display( ).
   ENDMETHOD.
 
 
