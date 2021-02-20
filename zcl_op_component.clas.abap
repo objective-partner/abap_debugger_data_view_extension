@@ -42,7 +42,7 @@ CLASS zcl_op_component IMPLEMENTATION.
 
     r_current_context = i_current_context.
 
-    CHECK i_component IS NOT INITIAL AND i_component_info-fieldname NE |INDEX|.
+    CHECK i_component IS NOT INITIAL. "AND i_component_info-fieldname NE |INDEX|.
 
 *    DATA(assign_component_value) = COND #(
 *                WHEN i_component_info-datatype EQ |TTYP| THEN | = { i_component }|

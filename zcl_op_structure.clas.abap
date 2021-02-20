@@ -127,8 +127,8 @@ CLASS zcl_op_structure IMPLEMENTATION.
 
       ASSIGN COMPONENT field_info-fieldname OF STRUCTURE i_structure TO FIELD-SYMBOL(<field>).
       CHECK <field> IS ASSIGNED AND
-            <field> IS NOT INITIAL AND
-            field_info-seltext NE |INDEX|.
+            <field> IS NOT INITIAL.
+*            AND field_info-seltext NE |INDEX|.
 
       current_context = COND #( WHEN field_info-datatype EQ 'TTYP' THEN me->add_itab(   i_current_context = current_context
                                                                                         i_table           = <field>
