@@ -168,7 +168,9 @@ ENDCLASS.
 
 CLASS ltc_struc_enh_should_not DEFINITION DEFERRED.
 CLASS zcl_op_structure DEFINITION LOCAL FRIENDS ltc_struc_enh_should_not.
-CLASS ltc_struc_enh_should_not DEFINITION FOR TESTING.
+CLASS ltc_struc_enh_should_not DEFINITION FOR TESTING
+  DURATION SHORT
+  RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
     METHODS: miss_value_operator FOR TESTING.
