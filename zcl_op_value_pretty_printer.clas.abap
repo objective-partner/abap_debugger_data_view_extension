@@ -149,95 +149,18 @@ ENDCLASS.
 
 
 
-CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
+CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
 
-
-  METHOD add_to_trace.
-
-    ASSIGN sync_points[ lines( sync_points ) ] TO FIELD-SYMBOL(<sync_point>).
-
-    APPEND VALUE ty_trace(
-            LET length = offset - <sync_point>-offset IN
-            sync_point        = lines( sync_points )
-            parent_sync_point = lines( sync_points ) - 1
-            terminal          = <sync_point>-terminal
-            sub_terminal      = <sync_point>-sub_terminal
-            offset            = <sync_point>-offset
-            length            = length
-            "text              = text+<sync_point>-offset(length)
-        ) TO trace_tab.
-
-    DELETE sync_points INDEX lines( sync_points ).
-
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
-
+  METHOD get_spaces.
+    DATA(spaces_no) = steering[ lines( steering ) ]-offset_no.
+    r_spaces_string = repeat( val = ` ` occ = spaces_no ).
   ENDMETHOD.
 
 
-  METHOD assign.
-*    assign : symbolname = RHS
-    TRY.
-        spaces( ).
-        DATA(point) = set_sync_point( c_terminal-assign ).
-        symbolname( ).
-        non_terminal( sub_terminal = c_sub_terminal-assign_operator regex = '=' ).
-        rhs( ).
-        non_terminal( sub_terminal = c_sub_terminal-end_of_statement regex = '\.' ).
-        add_to_trace( ).
-      CLEANUP.
-        reset_to_sync_point( point ).
-    ENDTRY.
-  ENDMETHOD.
-
-
-  METHOD cancel_sync_point.
-
-    DELETE trace_tab FROM sync_points[ sync_point ]-trace_index + 1.
-    DELETE sync_points FROM sync_point.
-
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
-
-  ENDMETHOD.
-
-
-  METHOD clean_up_steering_tab.
-    CHECK i_last_char EQ |)|.
-    "a formating block is complete
-    "we need to clean up our steering data and remove infos about this complete formating block
-    DATA(x_lines) = lines( steering ).
-
-    DO x_lines TIMES.
-      DATA(line) = steering[ x_lines ].
-      DELETE steering INDEX x_lines.
-      IF line-char EQ |(|.
-        EXIT.
-      ENDIF.
-
-      IF x_lines = 1.
-        EXIT.
-      ELSE.
-        x_lines = x_lines - 1.
-      ENDIF.
-
-    ENDDO.
-
-  ENDMETHOD.
-
-
-  METHOD empty.
-*    empty : 'VALUE #( )'
-    TRY.
-        spaces( ).
-        DATA(point) = set_sync_point( c_terminal-empty ).
-        regex( `VALUE #\( \)` ).
-        add_to_trace( ).
-      CLEANUP.
-        reset_to_sync_point( point ).
-    ENDTRY.
+  METHOD get_offset_in_current_line.
+    SPLIT i_content  AT c_newline INTO TABLE DATA(lt_split).
+    DATA(last_line) = lt_split[ lines( lt_split ) ].
+    r_offset = strlen( last_line ) + 1.
   ENDMETHOD.
 
 
@@ -277,88 +200,43 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_offset_in_current_line.
-    SPLIT i_content  AT c_newline INTO TABLE DATA(lt_split).
-    DATA(last_line) = lt_split[ lines( lt_split ) ].
-    r_offset = strlen( last_line ) + 1.
+  METHOD clean_up_steering_tab.
+    CHECK i_last_char EQ |)|.
+    "a formating block is complete
+    "we need to clean up our steering data and remove infos about this complete formating block
+    DATA(x_lines) = lines( steering ).
+
+    DO x_lines TIMES.
+      DATA(line) = steering[ x_lines ].
+      DELETE steering INDEX x_lines.
+      IF line-char EQ |(|.
+        EXIT.
+      ENDIF.
+
+      IF x_lines = 1.
+        EXIT.
+      ELSE.
+        x_lines = x_lines - 1.
+      ENDIF.
+
+    ENDDO.
+
   ENDMETHOD.
 
-
-  METHOD get_spaces.
-    DATA(spaces_no) = steering[ lines( steering ) ]-offset_no.
-    r_spaces_string = repeat( val = ` ` occ = spaces_no ).
-  ENDMETHOD.
-
-
-  METHOD non_terminal.
+  METHOD assign.
+*    assign : symbolname = RHS
     TRY.
         spaces( ).
-        DATA(point) = set_sync_point( i_terminal = c_terminal-non_terminal i_sub_terminal = sub_terminal ).
-        regex( regex ).
+        DATA(point) = set_sync_point( c_terminal-assign ).
+        symbolname( ).
+        non_terminal( sub_terminal = c_sub_terminal-assign_operator regex = '=' ).
+        rhs( ).
+        non_terminal( sub_terminal = c_sub_terminal-end_of_statement regex = '\.' ).
         add_to_trace( ).
       CLEANUP.
         reset_to_sync_point( point ).
     ENDTRY.
   ENDMETHOD.
-
-
-  METHOD number.
-    TRY.
-        spaces( ).
-        DATA(point) = set_sync_point( c_terminal-number ).
-        regex( `[0-9]+` ).
-        add_to_trace( ).
-      CLEANUP.
-        reset_to_sync_point( point ).
-    ENDTRY.
-  ENDMETHOD.
-
-
-  METHOD regex.
-    DATA: text_excerpt_offset TYPE i,
-          text_excerpt_length TYPE i.
-
-    IF offset >= strlen( text ).
-      text_excerpt_offset = nmax( val1 = 0 val2 = strlen( text ) - 30 ).
-      text_excerpt_length = nmin( val1 = 60 val2 = strlen( text ) - text_excerpt_offset ).
-      RAISE EXCEPTION TYPE lcx_no_match
-        EXPORTING
-          regex               = regex
-          offset              = offset
-          text_excerpt_offset = text_excerpt_offset
-          text_excerpt_length = text_excerpt_length
-          text_excerpt        = substring( val = text off = text_excerpt_offset len = text_excerpt_length ).
-    ENDIF.
-    data(regex2) = '^' && regex.
-    FIND FIRST OCCURRENCE OF REGEX regex2 IN text+offset MATCH LENGTH DATA(length).
-    IF sy-subrc = 0.
-      offset = offset + length.
-    ELSE.
-      text_excerpt_offset = nmax( val1 = 0 val2 = offset - 30 ).
-      text_excerpt_length = nmin( val1 = 60 val2 = strlen( text ) - text_excerpt_offset ).
-      RAISE EXCEPTION TYPE lcx_no_match
-        EXPORTING
-          regex               = regex
-          offset              = offset
-          text_excerpt_offset = text_excerpt_offset
-          text_excerpt_length = text_excerpt_length
-          text_excerpt        = substring( val = text off = text_excerpt_offset len = text_excerpt_length ).
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD reset_to_sync_point.
-
-    DELETE trace_tab FROM sync_points[ sync_point ]-trace_index + 1.
-    offset = sync_points[ sync_point ]-offset.
-    DELETE sync_points FROM sync_point.
-
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
-
-  ENDMETHOD.
-
 
   METHOD rhs.
 *    RHS : number | text | string | empty | struct | table
@@ -392,86 +270,17 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
     add_to_trace( ).
   ENDMETHOD.
 
-
-  METHOD rhs2.
-*    RHS2 : number | text | string | empty | struct2
+  METHOD empty.
+*    empty : 'VALUE #( )'
     TRY.
         spaces( ).
-        DATA(point) = set_sync_point( c_terminal-rhs2 ).
-        TRY.
-            number( ).
-          CATCH lcx_no_match.
-            TRY.
-                text_literal( ).
-              CATCH lcx_no_match.
-                TRY.
-                    string_literal( ).
-                  CATCH lcx_no_match.
-                    TRY.
-                        empty( ).
-                      CATCH lcx_no_match.
-                        struct2( ).
-                    ENDTRY.
-                ENDTRY.
-            ENDTRY.
-        ENDTRY.
+        DATA(point) = set_sync_point( c_terminal-empty ).
+        regex( `VALUE #\( \)` ).
         add_to_trace( ).
       CLEANUP.
         reset_to_sync_point( point ).
     ENDTRY.
   ENDMETHOD.
-
-
-  METHOD set_sync_point.
-
-    APPEND VALUE ty_sync_point(
-            terminal     = i_terminal
-            sub_terminal = i_sub_terminal
-            offset       = offset
-            trace_index  = lines( trace_tab )
-        ) TO sync_points.
-
-    sync_point = lines( sync_points ).
-
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
-
-  ENDMETHOD.
-
-
-  METHOD spaces.
-    IF offset >= strlen( text ).
-      RETURN.
-    ENDIF.
-    FIND FIRST OCCURRENCE OF REGEX '^\s+' IN text+offset MATCH LENGTH DATA(length).
-    IF sy-subrc = 0.
-      APPEND VALUE ty_trace(
-              "LET trace_line = REF #( COND #( WHEN trace_tab Is not initial then trace_tab[ lines( trace_tab ) ] ) IN
-              sync_point        = 0
-              parent_sync_point = 0
-              terminal          = c_terminal-spaces
-              sub_terminal      = c_sub_terminal-na
-              offset            = offset
-              length            = length
-              "text              = repeat( val = ` ` occ = length )
-          ) TO trace_tab.
-      offset = offset + length.
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD string_literal.
-    TRY.
-        spaces( ).
-        DATA(point) = set_sync_point( c_terminal-string_literal ).
-        regex( '`(?:``|[^`])+`' ).
-        add_to_trace( ).
-      CLEANUP.
-        reset_to_sync_point( point ).
-    ENDTRY.
-  ENDMETHOD.
-
 
   METHOD struct.
 *    struct : 'VALUE #(' struct2 ')'
@@ -486,7 +295,6 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
         reset_to_sync_point( point ).
     ENDTRY.
   ENDMETHOD.
-
 
   METHOD struct2.
 *    struct2 : ( symbolname '=' RHS )+
@@ -520,27 +328,6 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
         reset_to_sync_point( point ).
     ENDTRY.
   ENDMETHOD.
-
-
-  METHOD symbolname.
-    TRY.
-        spaces( ).
-        DATA(point) = set_sync_point( c_terminal-symbolname ).
-        " SCALAR
-        " STRUCTURE
-        " TABLE
-        " STRUCTURE-COMPONENT
-        " TABLE[1]
-        " TABLE[1]-COMPONENT
-        " VAR_2
-        " /NAMESPACE/VARIABLE
-        regex( `[A-Z][A-Z0-9_/\-\[\]]*` ).
-        add_to_trace( ).
-      CLEANUP.
-        reset_to_sync_point( point ).
-    ENDTRY.
-  ENDMETHOD.
-
 
   METHOD table.
 *    table : 'VALUE #(' ( '( )' | ( '(' RHS2 ')' )+ ) ')'
@@ -577,6 +364,74 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
+  METHOD rhs2.
+*    RHS2 : number | text | string | empty | struct2
+    TRY.
+        spaces( ).
+        DATA(point) = set_sync_point( c_terminal-rhs2 ).
+        TRY.
+            number( ).
+          CATCH lcx_no_match.
+            TRY.
+                text_literal( ).
+              CATCH lcx_no_match.
+                TRY.
+                    string_literal( ).
+                  CATCH lcx_no_match.
+                    TRY.
+                        empty( ).
+                      CATCH lcx_no_match.
+                        struct2( ).
+                    ENDTRY.
+                ENDTRY.
+            ENDTRY.
+        ENDTRY.
+        add_to_trace( ).
+      CLEANUP.
+        reset_to_sync_point( point ).
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD symbolname.
+    TRY.
+        spaces( ).
+        DATA(point) = set_sync_point( c_terminal-symbolname ).
+        " SCALAR
+        " STRUCTURE
+        " TABLE
+        " STRUCTURE-COMPONENT
+        " TABLE[1]
+        " TABLE[1]-COMPONENT
+        " VAR_2
+        " /NAMESPACE/VARIABLE
+        regex( `[A-Z][A-Z0-9_/\-\[\]]+` ).
+        add_to_trace( ).
+      CLEANUP.
+        reset_to_sync_point( point ).
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD number.
+    TRY.
+        spaces( ).
+        DATA(point) = set_sync_point( c_terminal-number ).
+        regex( `[0-9]+` ).
+        add_to_trace( ).
+      CLEANUP.
+        reset_to_sync_point( point ).
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD non_terminal.
+    TRY.
+        spaces( ).
+        DATA(point) = set_sync_point( i_terminal = c_terminal-non_terminal i_sub_terminal = sub_terminal ).
+        regex( regex ).
+        add_to_trace( ).
+      CLEANUP.
+        reset_to_sync_point( point ).
+    ENDTRY.
+  ENDMETHOD.
 
   METHOD text_literal.
     TRY.
@@ -589,6 +444,49 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
+  METHOD string_literal.
+    TRY.
+        spaces( ).
+        DATA(point) = set_sync_point( c_terminal-string_literal ).
+        regex( '`(?:``|[^`])+`' ).
+        add_to_trace( ).
+      CLEANUP.
+        reset_to_sync_point( point ).
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD spaces.
+    IF offset >= strlen( text ).
+      RETURN.
+    ENDIF.
+    FIND FIRST OCCURRENCE OF REGEX '^\s+' IN text+offset MATCH LENGTH DATA(length).
+    IF sy-subrc = 0.
+      APPEND VALUE ty_trace(
+              "LET trace_line = REF #( COND #( WHEN trace_tab Is not initial then trace_tab[ lines( trace_tab ) ] ) IN
+              sync_point        = 0
+              parent_sync_point = 0
+              terminal          = c_terminal-spaces
+              sub_terminal      = c_sub_terminal-na
+              offset            = offset
+              length            = length
+              "text              = repeat( val = ` ` occ = length )
+          ) TO trace_tab.
+      offset = offset + length.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD regex.
+    IF offset >= strlen( text ).
+      RAISE EXCEPTION TYPE lcx_no_match.
+    ENDIF.
+    data(regex2) = '^' && regex.
+    FIND FIRST OCCURRENCE OF REGEX regex2 IN text+offset MATCH LENGTH DATA(length).
+    IF sy-subrc = 0.
+      offset = offset + length.
+    ELSE.
+      RAISE EXCEPTION TYPE lcx_no_match.
+    ENDIF.
+  ENDMETHOD.
 
   METHOD zif_op_value_pretty_printer~format.
 
@@ -657,4 +555,72 @@ CLASS ZCL_OP_VALUE_PRETTY_PRINTER IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
+
+  METHOD add_to_trace.
+
+    ASSIGN sync_points[ lines( sync_points ) ] TO FIELD-SYMBOL(<sync_point>).
+
+    APPEND VALUE ty_trace(
+            LET length = offset - <sync_point>-offset IN
+            sync_point        = lines( sync_points )
+            parent_sync_point = lines( sync_points ) - 1
+            terminal          = <sync_point>-terminal
+            sub_terminal      = <sync_point>-sub_terminal
+            offset            = <sync_point>-offset
+            length            = length
+            "text              = text+<sync_point>-offset(length)
+        ) TO trace_tab.
+
+    DELETE sync_points INDEX lines( sync_points ).
+
+    if 0 = 1.
+      raise EXCEPTION type lcx_parser_interrupt.
+    endif.
+
+  ENDMETHOD.
+
+
+  METHOD set_sync_point.
+
+    APPEND VALUE ty_sync_point(
+            terminal     = i_terminal
+            sub_terminal = i_sub_terminal
+            offset       = offset
+            trace_index  = lines( trace_tab )
+        ) TO sync_points.
+
+    sync_point = lines( sync_points ).
+
+    if 0 = 1.
+      raise EXCEPTION type lcx_parser_interrupt.
+    endif.
+
+  ENDMETHOD.
+
+
+  METHOD reset_to_sync_point.
+
+    DELETE trace_tab FROM sync_points[ sync_point ]-trace_index + 1.
+    offset = sync_points[ sync_point ]-offset.
+    DELETE sync_points FROM sync_point.
+
+    if 0 = 1.
+      raise EXCEPTION type lcx_parser_interrupt.
+    endif.
+
+  ENDMETHOD.
+
+
+  METHOD cancel_sync_point.
+
+    DELETE trace_tab FROM sync_points[ sync_point ]-trace_index + 1.
+    DELETE sync_points FROM sync_point.
+
+    if 0 = 1.
+      raise EXCEPTION type lcx_parser_interrupt.
+    endif.
+
+  ENDMETHOD.
+
 ENDCLASS.
