@@ -18,8 +18,8 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
   METHOD simple_structure.
 
     DATA(content_expected) = |STRUCTURE = VALUE #( MANDT = '100' CARRID = 'AA' CONNID = '0017' FLDATE = '20141217' PRICE = '422.94' | &&
-                             |CURRENCY = 'USD' PLANETYPE = '747-400' SEATSMAX = '385' SEATSOCC = '372' PAYMENTSUM = '192437.84' SEATSMAX_B | &&
-                             |= '31' SEATSOCC_B = '28' SEATSMAX_F = '21' SEATSOCC_F = '21' ).|.
+                             |CURRENCY = 'USD' PLANETYPE = '747-400' SEATSMAX = 385 SEATSOCC = 372 PAYMENTSUM = '192437.84' SEATSMAX_B | &&
+                             |= 31 SEATSOCC_B = 28 SEATSMAX_F = 21 SEATSOCC_F = 21 ).|.
     TYPES: BEGIN OF test_type,
              mandt      TYPE s_mandt,
              carrid     TYPE s_carr_id,
@@ -40,10 +40,10 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
     DATA(structure) = VALUE test_type(   mandt      =  '100'      carrid     =  'AA'
                                          connid     =  '0017'     fldate     =  '20141217'
                                          price      =  '422.94'   currency   =  'USD'
-                                         planetype  =  '747-400'  seatsmax   =  '385'
-                                         seatsocc   =  '372'      paymentsum =  '192437.84'
-                                         seatsmax_b =  '31'       seatsocc_b =  '28'
-                                         seatsmax_f =  '21'       seatsocc_f =  '21'  ).
+                                         planetype  =  '747-400'  seatsmax   =  385
+                                         seatsocc   =  372        paymentsum =  '192437.84'
+                                         seatsmax_b =  31         seatsocc_b =  28
+                                         seatsmax_f =  21         seatsocc_f =  21  ).
 
 
     DATA(content) = NEW zcl_op_structure( )->prepare_output( i_structure          = structure
@@ -73,7 +73,7 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
                                                                                     col2 = 2
                                                                                    ) ).
 
-    DATA(content_expected) = |NESTED_STRUCTURE = VALUE #( COL1 = '1' COL2 = VALUE #( COL1 = '1' COL2 = '2' ) ).|.
+    DATA(content_expected) = |NESTED_STRUCTURE = VALUE #( COL1 = 1 COL2 = VALUE #( COL1 = 1 COL2 = 2 ) ).|.
 
 
     DATA(content) = NEW zcl_op_structure( )->prepare_output( i_structure          = nested_structure
@@ -111,7 +111,7 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
                                                                             )
                                                             ).
 
-    DATA(content_expected) = |MIXED_STRUCTURE = VALUE #( COL1 = '1' COL2 = VALUE #( COL1 = '1' COL2 = '2' ) COL3 = '3' COL4 = VALUE #( COL1 = '1' COL2 = '2' ) ).|.
+    DATA(content_expected) = |MIXED_STRUCTURE = VALUE #( COL1 = 1 COL2 = VALUE #( COL1 = 1 COL2 = 2 ) COL3 = 3 COL4 = VALUE #( COL1 = 1 COL2 = 2 ) ).|.
 
     DATA(content) = NEW zcl_op_structure( )->prepare_output(  i_structure          = mixed_structure
                                                               i_field_catalog      = NEW zcl_op_simple_field_catalog( )->get_by_data( i_structure = mixed_structure )
@@ -153,8 +153,8 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
                                                     ).
 
 
-    DATA(content_expected) = |ITAB_IN_STRUCTURE = VALUE #( COL1 = '1' COL2 = VALUE #( COL1 = '11' COL2 = '22' ) COL3 = VALUE #(| &&
-                             | ( COL1 = '311 ' COL2 = VALUE #( COL1 = '3121' COL2 = '3122' ) ) ( COL1 = '321 ' COL2 = VALUE #( COL1 = '3221' COL2 = '3222' ) ) ) ).|.
+    DATA(content_expected) = |ITAB_IN_STRUCTURE = VALUE #( COL1 = 1 COL2 = VALUE #( COL1 = 11 COL2 = 22 ) COL3 = VALUE #(| &&
+                             | ( COL1 = 311 COL2 = VALUE #( COL1 = 3121 COL2 = 3122 ) ) ( COL1 = 321 COL2 = VALUE #( COL1 = 3221 COL2 = 3222 ) ) ) ).|.
 
     DATA(content) = NEW zcl_op_structure( )->prepare_output(    i_structure          = itab_in_struc
                                                                 i_field_catalog      = NEW zcl_op_simple_field_catalog( )->get_by_data( i_structure = itab_in_struc )
@@ -190,7 +190,9 @@ ENDCLASS.
 
 CLASS ltc_struc_enh_should_not DEFINITION DEFERRED.
 CLASS zcl_op_structure DEFINITION LOCAL FRIENDS ltc_struc_enh_should_not.
-CLASS ltc_struc_enh_should_not DEFINITION FOR TESTING.
+CLASS ltc_struc_enh_should_not DEFINITION FOR TESTING
+  DURATION SHORT
+  RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
     METHODS: miss_value_operator FOR TESTING.
@@ -249,9 +251,9 @@ CLASS ltc_struc_enh_should_not IMPLEMENTATION.
                                                                                    )
                                                        ).
 
-    DATA(content_expected) = |NESTED_STRUCTURE = VALUE #( S_DAILY_PROCESSING = VALUE #( BASE = VALUE #( COL1 = '1' COL2 = '2' ) | &&
-                             |TT_CLIENT_COMPANY = VALUE #( ( BASE = VALUE #( COL1 = '1' COL2 = '2' ) TT_SHIPPMENT = VALUE #( ( BASE | &&
-                             |= VALUE #( COL1 = '1' COL2 = '2' ) CLIENT_ORDER_ID = '1 ' WAREHOUSE_ID = '2 ' ) ) ) ) ) ).|.
+    DATA(content_expected) = |NESTED_STRUCTURE = VALUE #( S_DAILY_PROCESSING = VALUE #( BASE = VALUE #( COL1 = 1 COL2 = 2 ) | &&
+                             |TT_CLIENT_COMPANY = VALUE #( ( BASE = VALUE #( COL1 = 1 COL2 = 2 ) TT_SHIPPMENT = VALUE #( ( BASE | &&
+                             |= VALUE #( COL1 = 1 COL2 = 2 ) CLIENT_ORDER_ID = 1 WAREHOUSE_ID = 2 ) ) ) ) ) ).|.
 
 
     DATA(content) = NEW zcl_op_structure( )->prepare_output( i_structure          = nested_structure

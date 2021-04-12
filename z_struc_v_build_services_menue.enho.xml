@@ -36,6 +36,7 @@
      <FULL_NAME>\TY:CL_TPDA_TOOL_STRUC_VIEW\IN:IF_TPDA_TOOL\ME:HANDLE_OK_CODE\SE:BEGIN\EI</FULL_NAME>
      <SOURCE>
       <item> IF p_ok_code-ok_code EQ &apos;ZDATA_4_ABAP&apos;.</item>
+      <item>   zcl_op_debugger_integration=&gt;debug_debugger_if_needed( ).</item>
       <item>   TRY.</item>
       <item>     DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = dynp_vars-struc_name ).</item>
       <item/>
@@ -60,14 +61,14 @@
    <SOTR>
     <item>
      <HEADER>
-      <CONCEPT>EC243641C8EB1EDBA6F5A2D025AA0270</CONCEPT>
+      <CONCEPT>000D3A46373D1EDA9BA13BBAE94A9A1A</CONCEPT>
       <CREA_LAN>E</CREA_LAN>
       <TRALA_TYPE>1</TRALA_TYPE>
       <OBJID_VEC>AAI=</OBJID_VEC>
      </HEADER>
      <ENTRIES>
       <SOTR_TEXT>
-       <CONCEPT>EC243641C8EB1EDBA6F5A2D025AA0270</CONCEPT>
+       <CONCEPT>000D3A46373D1EDA9BA13BBAE94A9A1A</CONCEPT>
        <LANGU>E</LANGU>
        <LFD_NUM>0001</LFD_NUM>
        <FLAG_CNTXT>X</FLAG_CNTXT>
@@ -83,7 +84,7 @@
      <PGMID>R3TR</PGMID>
      <OBJECT>ENHO</OBJECT>
      <OBJ_NAME>Z_STRUC_V_BUILD_SERVICES_MENUE</OBJ_NAME>
-     <CONCEPT>EC243641C8EB1EDBA6F5A2D025AA0270</CONCEPT>
+     <CONCEPT>000D3A46373D1EDA9BA13BBAE94A9A1A</CONCEPT>
      <LFD_NUM>0001</LFD_NUM>
     </SOTR_USE>
    </SOTR_USE>

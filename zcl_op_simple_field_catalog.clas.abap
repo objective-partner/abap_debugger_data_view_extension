@@ -25,14 +25,16 @@ CLASS zcl_op_simple_field_catalog DEFINITION
     METHODS:
       get_fieldcatalog_from_ddic
         IMPORTING
-          i_structure_description TYPE REF TO cl_abap_structdescr
+          i_rtti                 TYPE REF TO cl_abap_typedescr
+*          i_structure_description TYPE REF TO cl_abap_structdescr
         RETURNING
-          VALUE(r_field_catalog)  TYPE lvc_t_fcat,
+          VALUE(r_field_catalog) TYPE lvc_t_fcat,
       get_fieldcat_from_local_type
         IMPORTING
-          i_structure_description TYPE REF TO cl_abap_structdescr
+          i_rtti                 TYPE REF TO cl_abap_typedescr
+*          i_structure_description TYPE REF TO cl_abap_structdescr
         RETURNING
-          VALUE(r_field_catalog)  TYPE lvc_t_fcat,
+          VALUE(r_field_catalog) TYPE lvc_t_fcat,
       transform
         CHANGING
           !c_ddic_fields TYPE ddfields OPTIONAL
@@ -63,16 +65,15 @@ CLASS zcl_op_simple_field_catalog IMPLEMENTATION.
 
   METHOD get_fieldcatalog_via_reference.
 
-    TRY.
-        DATA(structure_description) = CAST cl_abap_structdescr( cl_abap_structdescr=>describe_by_data_ref( i_reference_to_data ) ).
-      CATCH  cx_sy_move_cast_error.
-        DATA(table_description) = CAST cl_abap_tabledescr( cl_abap_tabledescr=>describe_by_data_ref( i_reference_to_data ) ).
-        structure_description = CAST cl_abap_structdescr( table_description->get_table_line_type( ) ).
-    ENDTRY.
+    DATA(rtti) = cl_abap_typedescr=>describe_by_data_ref( i_reference_to_data ).
 
-    r_field_catalog = COND #( WHEN structure_description->is_ddic_type( ) = abap_true
-                                                    THEN me->get_fieldcatalog_from_ddic( structure_description )
-                                          ELSE me->get_fieldcat_from_local_type( structure_description ) ).
+    IF rtti->kind = rtti->kind_table.
+      rtti = CAST cl_abap_tabledescr( rtti )->get_table_line_type( ).
+    ENDIF.
+
+    r_field_catalog = COND #( WHEN rtti->is_ddic_type( ) = abap_true
+                              THEN me->get_fieldcatalog_from_ddic( rtti )
+                              ELSE me->get_fieldcat_from_local_type( rtti ) ).
 
   ENDMETHOD.
 
@@ -86,7 +87,12 @@ CLASS zcl_op_simple_field_catalog IMPLEMENTATION.
 
   METHOD get_fieldcatalog_from_ddic.
 
-    DATA(ddic_fields) = i_structure_description->get_ddic_field_list( ).
+    CASE i_rtti->kind.
+      WHEN i_rtti->kind_elem.
+        DATA(ddic_fields) = VALUE ddfields( ( CAST cl_abap_elemdescr( i_rtti )->get_ddic_field( ) ) ).
+      WHEN i_rtti->kind_struct.
+        ddic_fields = CAST cl_abap_structdescr( i_rtti )->get_ddic_field_list( ).
+    ENDCASE.
 
     transform( CHANGING c_ddic_fields = ddic_fields ).
 
@@ -97,46 +103,57 @@ CLASS zcl_op_simple_field_catalog IMPLEMENTATION.
 
   METHOD get_fieldcat_from_local_type.
     "in case it is a local itab, structure or element definition
-    LOOP AT i_structure_description->get_components( ) INTO DATA(component).
-      CASE component-type->kind.
-        WHEN 'E'.
-          DATA(element_description) = CAST cl_abap_elemdescr( component-type ).
-          IF element_description->is_ddic_type( ) = abap_true.
-            APPEND VALUE lvc_s_fcat( fieldname  = component-name
-                                     seltext    = component-name
-                                     inttype    = element_description->type_kind
-                                     decimals   = element_description->decimals
-                                     convexit   = element_description->edit_mask
-                                     outputlen  = element_description->output_length ) TO r_field_catalog.
+    CASE i_rtti->kind.
+      WHEN i_rtti->kind_elem.
+        APPEND VALUE lvc_s_fcat( LET element_description2 = CAST cl_abap_elemdescr( i_rtti ) IN
+                                 inttype    = element_description2->type_kind
+                                 decimals   = element_description2->decimals
+                                 convexit   = element_description2->edit_mask
+                                 outputlen  = element_description2->output_length )
+                               TO r_field_catalog.
+      WHEN i_rtti->kind_struct.
+        LOOP AT CAST cl_abap_structdescr( i_rtti )->get_components( ) INTO DATA(component).
+          CASE component-type->kind.
+            WHEN 'E'.
+              DATA(element_description) = CAST cl_abap_elemdescr( component-type ).
+              IF element_description->is_ddic_type( ) = abap_true.
+                APPEND VALUE lvc_s_fcat( fieldname  = component-name
+                                         seltext    = component-name
+                                         inttype    = element_description->type_kind
+                                         decimals   = element_description->decimals
+                                         convexit   = element_description->edit_mask
+                                         outputlen  = element_description->output_length )
+                               TO r_field_catalog.
 
-          ELSE.
-            APPEND VALUE lvc_s_fcat( fieldname  = component-name
-                                     seltext    = component-name
-                                     inttype    = element_description->type_kind
-                                     decimals   = element_description->decimals
-                                     convexit   = element_description->edit_mask
-                                     outputlen  = element_description->output_length ) TO r_field_catalog.
-          ENDIF.
-        WHEN 'S'.
-          if component-as_include = abap_true.
-            data(lt_aux) = me->get_fieldcat_from_local_type( i_structure_description = cast #( component-type ) ).
-            append lines of lt_aux to r_field_catalog.
-          else.
-            DATA(structure_description) = CAST cl_abap_structdescr( component-type ).
-            APPEND VALUE lvc_s_fcat( fieldname  = component-name
-                                     seltext    = component-name
-                                     inttype    = structure_description->type_kind
-                                     datatype   = |STRU| ) TO r_field_catalog.
-          endif.
-        WHEN 'T'.
-          DATA(table_description) = CAST cl_abap_tabledescr( component-type ).
-          APPEND VALUE #(  fieldname = component-name
-                           seltext   = component-name
-                           inttype   = table_description->type_kind
-                           datatype  = COND #( WHEN table_description->kind EQ |T| THEN |TTYP| ELSE space ) ) TO r_field_catalog.
-      ENDCASE.
+              ELSE.
+                APPEND VALUE lvc_s_fcat( fieldname  = component-name
+                                         seltext    = component-name
+                                         inttype    = element_description->type_kind
+                                         decimals   = element_description->decimals
+                                         convexit   = element_description->edit_mask
+                                         outputlen  = element_description->output_length )
+                               TO r_field_catalog.
+              ENDIF.
+            WHEN 'S'.
+              DATA(structure_description) = CAST cl_abap_structdescr( component-type ).
+              APPEND VALUE lvc_s_fcat( fieldname  = component-name
+                                       seltext    = component-name
+                                       inttype    = structure_description->type_kind
+                                       datatype   = |STRU| )
+                               TO r_field_catalog.
+            WHEN 'T'.
+              DATA(table_description) = CAST cl_abap_tabledescr( component-type ).
+              APPEND VALUE #(  fieldname = component-name
+                               seltext   = component-name
+                               inttype   = table_description->type_kind
+                               datatype  = COND #( WHEN table_description->kind EQ table_description->kind_table
+                                                   THEN |TTYP|
+                                                   ELSE space ) )
+                               TO r_field_catalog.
+          ENDCASE.
 
-    ENDLOOP.
+        ENDLOOP.
+    ENDCASE.
   ENDMETHOD.
 
 

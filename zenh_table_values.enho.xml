@@ -36,6 +36,7 @@
       <item>  CASE e_ucomm.</item>
       <item>      WHEN &apos;ZDATA_4_ABAP_VIEW&apos;. &quot;user klicked on Button to display ABAP friendly table data</item>
       <item>       FIELD-SYMBOLS: &lt;zz_table&gt; TYPE any table.</item>
+      <item>       zcl_op_debugger_integration=&gt;debug_debugger_if_needed( ).</item>
       <item>       TRY.</item>
       <item>         TRY.</item>
       <item>            DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )-&gt;get_ref_to_any_content( i_variable_name = me-&gt;table ).</item>
@@ -70,14 +71,14 @@
    <SOTR>
     <item>
      <HEADER>
-      <CONCEPT>EC243641C8EB1EDBA6F5A2D025A8C270</CONCEPT>
+      <CONCEPT>000D3A46373D1EDA9BA13BBAE94A5A1A</CONCEPT>
       <CREA_LAN>E</CREA_LAN>
       <TRALA_TYPE>1</TRALA_TYPE>
       <OBJID_VEC>AAI=</OBJID_VEC>
      </HEADER>
      <ENTRIES>
       <SOTR_TEXT>
-       <CONCEPT>EC243641C8EB1EDBA6F5A2D025A8C270</CONCEPT>
+       <CONCEPT>000D3A46373D1EDA9BA13BBAE94A5A1A</CONCEPT>
        <LANGU>E</LANGU>
        <LFD_NUM>0001</LFD_NUM>
        <FLAG_CNTXT>X</FLAG_CNTXT>
@@ -93,7 +94,7 @@
      <PGMID>R3TR</PGMID>
      <OBJECT>ENHO</OBJECT>
      <OBJ_NAME>ZENH_TABLE_VALUES</OBJ_NAME>
-     <CONCEPT>EC243641C8EB1EDBA6F5A2D025A8C270</CONCEPT>
+     <CONCEPT>000D3A46373D1EDA9BA13BBAE94A5A1A</CONCEPT>
      <LFD_NUM>0001</LFD_NUM>
     </SOTR_USE>
    </SOTR_USE>

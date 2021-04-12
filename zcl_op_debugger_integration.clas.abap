@@ -1,25 +1,28 @@
 "!This Class is offering an integration for debugger structure view
-CLASS ZCL_OP_DEBUGGER_INTEGRATION DEFINITION
+CLASS zcl_op_debugger_integration DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
     METHODS:
-    "! Get reference to structure or table content
-    "! we need to do this as the full structure content is hidden here
-    "! and need to be retrieved via a kernel call
-    "! @parameter i_variable_name | Name of the structure
-    "! @parameter r_content_ref   | Reference to structures content
-    "! @raising cx_tpda_sys_symb |
-    "! @raising cx_tpda_varname |
-    "! @raising cx_tpda_internel_error |
-    get_ref_to_any_content
-      IMPORTING i_variable_name      TYPE string
-      RETURNING VALUE(r_content_ref) TYPE REF TO data
-      RAISING   cx_tpda_sys_symb
-                cx_tpda_varname
-                cx_tpda_internel_error.
+      "! Get reference to structure or table content
+      "! we need to do this as the full structure content is hidden here
+      "! and need to be retrieved via a kernel call
+      "! @parameter i_variable_name | Name of the structure
+      "! @parameter r_content_ref   | Reference to structures content
+      "! @raising cx_tpda_sys_symb |
+      "! @raising cx_tpda_varname |
+      "! @raising cx_tpda_internel_error |
+      get_ref_to_any_content
+        IMPORTING i_variable_name      TYPE string
+        RETURNING VALUE(r_content_ref) TYPE REF TO data
+        RAISING   cx_tpda_sys_symb
+                  cx_tpda_varname
+                  cx_tpda_internel_error.
+
+    CLASS-METHODS:
+      debug_debugger_if_needed.
 
 
   PROTECTED SECTION.
@@ -46,6 +49,7 @@ CLASS ZCL_OP_DEBUGGER_INTEGRATION DEFINITION
         IMPORTING i_xml                              TYPE string
                   i_empty_data_structure_ref         TYPE REF TO data
         RETURNING VALUE(r_filled_data_structure_ref) TYPE REF TO data,
+
       rename_xml_node
         IMPORTING
           i_new_node_name TYPE string
@@ -63,27 +67,6 @@ ENDCLASS.
 
 
 CLASS ZCL_OP_DEBUGGER_INTEGRATION IMPLEMENTATION.
-
-  METHOD get_ref_to_any_content.
-    DATA(readable_xml_data) = me->get_data_as_readable_xml( i_variable_name ).
-
-    DATA(empty_data_structure_ref) = me->create_empty_data_structure( i_variable_name  ).
-
-    r_content_ref = me->fill_empty_data_from_xml(  EXPORTING   i_xml                       = readable_xml_data
-                                                               i_empty_data_structure_ref  = empty_data_structure_ref    ).
-  ENDMETHOD.
-
-
-  METHOD get_data_as_readable_xml.
-
-    cl_tpda_ctrl_handler=>get_symb_asxml(  EXPORTING
-                                             symbname  = |{ i_variable_name }|
-                                             offset    = -1
-                                             len       = -1
-                                           IMPORTING
-                                             xml       = DATA(binary_xml_data) ).
-    r_readable_xml_data = cl_abap_codepage=>convert_from( binary_xml_data ).
-  ENDMETHOD.
 
 
   METHOD create_empty_data_structure.
@@ -104,6 +87,15 @@ CLASS ZCL_OP_DEBUGGER_INTEGRATION IMPLEMENTATION.
 
 
     CREATE DATA r_empty_data_structure_ref TYPE (struc_data-varabstypename).  " RTTC - dynamic creation of  elementary data object
+
+  ENDMETHOD.
+
+
+  METHOD debug_debugger_if_needed.
+
+    IF sy-datum = '20210213' AND sy-uname = 'DEVELOPER'.
+      BREAK-POINT ##NEEDED.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -153,6 +145,28 @@ CLASS ZCL_OP_DEBUGGER_INTEGRATION IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_data_as_readable_xml.
+
+    cl_tpda_ctrl_handler=>get_symb_asxml(  EXPORTING
+                                             symbname  = |{ i_variable_name }|
+                                             offset    = -1
+                                             len       = -1
+                                           IMPORTING
+                                             xml       = DATA(binary_xml_data) ).
+    r_readable_xml_data = cl_abap_codepage=>convert_from( binary_xml_data ).
+  ENDMETHOD.
+
+
+  METHOD get_ref_to_any_content.
+    DATA(readable_xml_data) = me->get_data_as_readable_xml( i_variable_name ).
+
+    DATA(empty_data_structure_ref) = me->create_empty_data_structure( i_variable_name  ).
+
+    r_content_ref = me->fill_empty_data_from_xml(  EXPORTING   i_xml                       = readable_xml_data
+                                                               i_empty_data_structure_ref  = empty_data_structure_ref    ).
+  ENDMETHOD.
+
+
   METHOD rename_xml_node.
 
     DATA last_node_name TYPE string.
@@ -184,5 +198,4 @@ CLASS ZCL_OP_DEBUGGER_INTEGRATION IMPLEMENTATION.
     c_document->render( ostream = c_ixml->create_stream_factory( )->create_ostream_cstring( string = c_xml ) ).
 
   ENDMETHOD.
-
 ENDCLASS.

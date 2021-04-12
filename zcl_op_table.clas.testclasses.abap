@@ -14,7 +14,9 @@ CLASS ltc_table_enh_should DEFINITION FOR TESTING
       "!check of
       prepare_ouput_w_1_line_itab FOR TESTING,
       structure_in_itab           FOR TESTING,
-      itab_in_itab                FOR TESTING.
+      itab_in_itab                FOR TESTING,
+      st05_main_record_table FOR TESTING RAISING cx_static_check,
+      ris_t_metadata FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -140,7 +142,180 @@ CLASS ltc_table_enh_should IMPLEMENTATION.
                                                   quit = if_aunit_constants=>method ).
   ENDMETHOD.
 
+  METHOD ST05_MAIN_RECORD_TABLE.
 
+  data(table) = value st05_main_record_table(
+    ( date                           = sy-datum
+      time                           = sy-uzeit
+      instance_name                  = 'INSTANCE_NAME'
+      duration                       = '10.5'
+      number_of_rows                 = '11.5'
+      object                         = 'OBJECT'
+      statement_with_values          = `STATEMENT_WITH_VALUES`
+      cursor                         = 'CURSOR'
+      array_size                     = 12
+      transaction                    = 'TRANSACTION'
+      program                        = 'PROGRAM'
+      db_connection_name             = 'DB_CONNECTION_NAME'
+      db_connection_id               = 'DB_CON_ID'
+      operation                      = 'OPERATI'
+      return_code                    = 13
+      wp_id                          = '001'
+      wp_type                        = 'DIA'
+      user_name                      = 'USER_NAME'
+      client                         = '100'
+      trans_id                       = 'TRANS_ID'
+      epp_root_id                    = 'EPP_ROOT_ID'
+      epp_connection_id              = 'EPP_CONNECTION_ID'
+      epp_connection_counter         = 14
+      record_number                  = 15
+      record_numbers                 = VALUE #( ( 16 ) ( 17 ) )
+      offset                         = 18
+      statement_with_names           = `STATEMENT_WITH_NAMES`
+      length_of_statement_with_names = 19
+      variables                      = `VARIABLES`
+      number_of_variables            = 20
+      trace_type                     = 'TRAC'
+      line_color                     = 'LINE'
+  ) ).
+
+    data(output) = table_view->prepare_output( i_table       = table
+                                         i_table_title = 'TABLE' ).
+
+  ENDMETHOD.
+
+
+  METHOD ris_t_metadata.
+    data(table) = value ris_t_metadata(
+      ( trobjtype                  = '????'
+        subtype                    = ''
+        legacy_type                = 'DWY'
+        search_groups              = VALUE ris_t_md_screen_groups(
+                                          ( name         = 'STANDARD'
+                                            parent_group = ''
+                                            text_ref     = 'TEXT-S01' )
+                                          ( name         = 'EINSTELLUNG'
+                                            parent_group = ''
+                                            text_ref     = '' ) )
+        search_elements            = VALUE ris_t_md_screen_elements(
+                                          ( index     = 1
+                                            name      = 'KEY1'
+                                            type      = 'SO'
+                                            group     = 'STANDARD'
+                                            line      = 0
+                                            for       = 'SDOKMEP-PROP_NAME'
+                                            rb_group  = ''
+                                            label_for = ''
+                                            label_ref = '' )
+                                          ( index     = 2
+                                            name      = 'XTEXT'
+                                            type      = 'SO'
+                                            group     = 'STANDARD'
+                                            line      = 0
+                                            for       = 'SDOKMET-DESCRIPT'
+                                            rb_group  = ''
+                                            label_for = ''
+                                            label_ref = '' ) )
+        where_used                 = VALUE ris_t_md_relationship(
+                                          ( trobjtype   = 'ECTC'
+                                            subtype     = ''
+                                            legacy_type = 'GC'
+                                            group       = 1 )
+                                          ( trobjtype   = 'ECTC'
+                                            subtype     = ''
+                                            legacy_type = 'GW'
+                                            group       = 1 ) )
+        environment                = VALUE ris_t_md_relationship(
+                                          ( trobjtype   = 'FUNC'
+                                            subtype     = ''
+                                            legacy_type = 'FF'
+                                            group       = 1 )
+                                          ( trobjtype   = 'DIAL'
+                                            subtype     = ''
+                                            legacy_type = 'A'
+                                            group       = 1 ) )
+        model_implementations      = VALUE ris_t_md_model_implementation( )
+*      ( type_name              =
+*        class_name             =
+*        priority               =
+*        default_implementation = ) )
+        where_used_original_dynpro = VALUE ris_t_md_relationship(
+                                          ( trobjtype   = 'ECAT'
+                                            subtype     = ''
+                                            legacy_type = 'GE'
+                                            group       = 1 )
+                                          ( trobjtype   = 'ECTC'
+                                            subtype     = ''
+                                            legacy_type = 'GW'
+                                            group       = 1 ) )
+)
+      ( trobjtype                  = '????'
+        subtype                    = ''
+        legacy_type                = 'GP'
+        search_groups              = VALUE ris_t_md_screen_groups(
+                                          ( name         = 'STANDARD'
+                                            parent_group = ''
+                                            text_ref     = 'TEXT-S01' )
+                                          ( name         = 'EINSTELLUNG'
+                                            parent_group = ''
+                                            text_ref     = '' ) )
+        search_elements            = VALUE ris_t_md_screen_elements(
+                                          ( index     = 1
+                                            name      = 'KEY1'
+                                            type      = 'SO'
+                                            group     = 'STANDARD'
+                                            line      = 0
+                                            for       = 'SDOKMEP-PROP_NAME'
+                                            rb_group  = ''
+                                            label_for = ''
+                                            label_ref = '' )
+                                          ( index     = 2
+                                            name      = 'XTEXT'
+                                            type      = 'SO'
+                                            group     = 'STANDARD'
+                                            line      = 0
+                                            for       = 'SDOKMET-DESCRIPT'
+                                            rb_group  = ''
+                                            label_for = ''
+                                            label_ref = '' ) )
+        where_used                 = VALUE ris_t_md_relationship(
+                                          ( trobjtype   = 'ECTC'
+                                            subtype     = ''
+                                            legacy_type = 'GC'
+                                            group       = 1 )
+                                          ( trobjtype   = 'ECTC'
+                                            subtype     = ''
+                                            legacy_type = 'GW'
+                                            group       = 1 ) )
+        environment                = VALUE ris_t_md_relationship(
+                                          ( trobjtype   = 'FUNC'
+                                            subtype     = ''
+                                            legacy_type = 'FF'
+                                            group       = 1 )
+                                          ( trobjtype   = 'DIAL'
+                                            subtype     = ''
+                                            legacy_type = 'A'
+                                            group       = 1 ) )
+        model_implementations      = VALUE ris_t_md_model_implementation( )
+*      ( type_name              =
+*        class_name             =
+*        priority               =
+*        default_implementation = ) )
+        where_used_original_dynpro = VALUE ris_t_md_relationship(
+                                          ( trobjtype   = 'ECAT'
+                                            subtype     = ''
+                                            legacy_type = 'GE'
+                                            group       = 1 )
+                                          ( trobjtype   = 'ECTC'
+                                            subtype     = ''
+                                            legacy_type = 'GW'
+                                            group       = 1 ) )
+) ).
+
+    data(output) = table_view->prepare_output( i_table       = table
+                                         i_table_title = 'TABLE' ).
+
+  ENDMETHOD.
 
 
 ENDCLASS.

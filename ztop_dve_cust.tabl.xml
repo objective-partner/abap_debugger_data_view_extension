@@ -232,6 +232,12 @@
      <LENG>000010</LENG>
     </DD36M>
    </DD36M>
+   <TABL_EXTRAS>
+    <TDDAT>
+     <TABNAME>ZTOP_DVE_CUST</TABNAME>
+     <CCLASS>&amp;NC&amp;</CCLASS>
+    </TDDAT>
+   </TABL_EXTRAS>
   </asx:values>
  </asx:abap>
 </abapGit>
