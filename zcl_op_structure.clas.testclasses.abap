@@ -8,7 +8,8 @@ CLASS ltc_struc_enh_should_process DEFINITION FOR TESTING DURATION SHORT  RISK L
       simple_structure FOR TESTING,
       nested_structure FOR TESTING,
       mixed_structure  FOR TESTING,
-      itab_in_structure FOR TESTING.
+      itab_in_structure FOR TESTING,
+      include_in_structure FOR TESTING.
 ENDCLASS.       "ltc_aunit_debugger_struc_enh
 
 
@@ -163,6 +164,27 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
                                         msg   = |itab in structure was not formated as expected|    ).
   ENDMETHOD.
 
+
+  METHOD include_in_structure.
+    TYPES BEGIN OF t_struct.
+            INCLUDE TYPE t000.
+    TYPES dummy_field_1 TYPE i.
+    TYPES dummy_field_2 TYPE string.
+    TYPES END OF t_struct.
+
+    DATA(include_in_structure) = VALUE t_struct( mandt = '100' mtext = 'someText' dummy_field_1 = 5 dummy_field_2 = 'someOtherText'  ).
+
+    DATA(content_expected) = |INCLUDE_IN_STRUCTURE = VALUE #( MANDT = '100' MTEXT = 'someText' DUMMY_FIELD_1 = '5' DUMMY_FIELD_2 = 'someOtherText' ).|.
+
+    DATA(content) = NEW zcl_op_structure( )->prepare_output(    i_structure          = include_in_structure
+                                                                i_field_catalog      = NEW zcl_op_simple_field_catalog( )->get_by_data( i_structure = include_in_structure )
+                                                                i_struc_name         = |INCLUDE_IN_STRUCTURE|  ).
+    cl_abap_unit_assert=>assert_equals( act   =  content
+                                        exp   =  content_expected
+                                        msg   = |include in structure was not formated as expected| ).
+
+
+  ENDMETHOD.
 
 ENDCLASS.
 

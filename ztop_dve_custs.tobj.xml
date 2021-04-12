@@ -25,10 +25,6 @@
     </OBJS>
    </OBJS>
    <TOBJ>
-    <TDDAT>
-     <TABNAME>ZTOP_DVE_CUST</TABNAME>
-     <CCLASS>&amp;NC&amp;</CCLASS>
-    </TDDAT>
     <TVDIR>
      <TABNAME>ZTOP_DVE_CUST</TABNAME>
      <AREA>ZOP_DVE_MAINTENA</AREA>
