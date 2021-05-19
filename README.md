@@ -1,3 +1,5 @@
+# This branch will support 7.40 syntax
+
 # abap debugger data view extension
 Extensions to abap debugger to be able to view itab and structure data in a abap-coding friendly way
 
