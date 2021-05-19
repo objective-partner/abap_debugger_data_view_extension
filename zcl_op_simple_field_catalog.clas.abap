@@ -23,33 +23,30 @@ CLASS zcl_op_simple_field_catalog DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     METHODS:
+
       get_fieldcatalog_from_ddic
-        IMPORTING
-          i_rtti                 TYPE REF TO cl_abap_typedescr
-*          i_structure_description TYPE REF TO cl_abap_structdescr
-        RETURNING
-          VALUE(r_field_catalog) TYPE lvc_t_fcat,
+        IMPORTING i_rtti                 TYPE REF TO cl_abap_typedescr
+        RETURNING VALUE(r_field_catalog) TYPE lvc_t_fcat,
+
       get_fieldcat_from_local_type
-        IMPORTING
-          i_rtti                 TYPE REF TO cl_abap_typedescr
-*          i_structure_description TYPE REF TO cl_abap_structdescr
-        RETURNING
-          VALUE(r_field_catalog) TYPE lvc_t_fcat,
+        IMPORTING i_rtti                 TYPE REF TO cl_abap_typedescr
+        RETURNING VALUE(r_field_catalog) TYPE lvc_t_fcat,
+
       transform
         CHANGING
           !c_ddic_fields TYPE ddfields OPTIONAL
           !c_ddic_field  TYPE dfies OPTIONAL,
+
       map_to_field_catalog
-        IMPORTING
-          i_ddic_fields          TYPE ddfields
-        RETURNING
-          VALUE(r_field_catalog) TYPE lvc_t_fcat,
+        IMPORTING i_ddic_fields          TYPE ddfields
+        RETURNING VALUE(r_field_catalog) TYPE lvc_t_fcat,
+
       get_reference_to_data
         IMPORTING
-          i_table       TYPE ANY TABLE
-          i_structure   TYPE any
-        RETURNING
-          VALUE(r_data) TYPE REF TO data,
+                  i_table       TYPE ANY TABLE
+                  i_structure   TYPE any
+        RETURNING VALUE(r_data) TYPE REF TO data,
+
       get_fieldcatalog_via_reference
         IMPORTING i_reference_to_data    TYPE REF TO data
         RETURNING VALUE(r_field_catalog) TYPE lvc_t_fcat.
@@ -135,12 +132,17 @@ CLASS zcl_op_simple_field_catalog IMPLEMENTATION.
                                TO r_field_catalog.
               ENDIF.
             WHEN 'S'.
-              DATA(structure_description) = CAST cl_abap_structdescr( component-type ).
-              APPEND VALUE lvc_s_fcat( fieldname  = component-name
-                                       seltext    = component-name
-                                       inttype    = structure_description->type_kind
-                                       datatype   = |STRU| )
-                               TO r_field_catalog.
+              IF component-as_include = abap_true.
+                DATA(lt_include_field_cat) = me->get_fieldcat_from_local_type( i_rtti = CAST #( component-type ) ).
+                APPEND LINES OF lt_include_field_cat TO r_field_catalog.
+              ELSE.
+                DATA(structure_description) = CAST cl_abap_structdescr( component-type ).
+                APPEND VALUE lvc_s_fcat( fieldname  = component-name
+                                         seltext    = component-name
+                                         inttype    = structure_description->type_kind
+                                         datatype   = |STRU| )
+                                 TO r_field_catalog.
+              ENDIF.
             WHEN 'T'.
               DATA(table_description) = CAST cl_abap_tabledescr( component-type ).
               APPEND VALUE #(  fieldname = component-name

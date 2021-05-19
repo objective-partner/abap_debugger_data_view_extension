@@ -1,4 +1,4 @@
-"!This class is offering an API for represent a table
+"!This class is offering an API for representing a table
 "!in its ABAP VALUE way: table_name = VALUE #( (...) )
 CLASS zcl_op_table DEFINITION
   PUBLIC
@@ -81,8 +81,7 @@ CLASS zcl_op_table IMPLEMENTATION.
               ASSIGN COMPONENT field_info-fieldname OF STRUCTURE <table_line> TO <field>.
             ENDIF.
             CHECK <field> IS ASSIGNED AND
-                  <field> IS NOT INITIAL. "AND
-*                  field_info-seltext NE |INDEX|.
+                  <field> IS NOT INITIAL.
 
             DATA(varvalue) = COND tpda_var_value( WHEN field_info-datatype = |TTYP|
                                                         THEN me->add_itab( i_current_context  = space

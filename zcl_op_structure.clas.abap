@@ -15,9 +15,9 @@ CLASS zcl_op_structure DEFINITION
       "! @parameter i_struc_name | structure name for "name" = VALUE #() statement
       show_popup_w_content
         IMPORTING
-                  i_structure     TYPE any
-                  i_field_catalog TYPE lvc_t_fcat
-                  i_struc_name    TYPE string,
+          i_structure     TYPE any
+          i_field_catalog TYPE lvc_t_fcat
+          i_struc_name    TYPE string,
       "! add a structure to given formated context
       "! @parameter i_current_context | current context as string
       "! @parameter i_structure |  given structure
@@ -128,7 +128,6 @@ CLASS zcl_op_structure IMPLEMENTATION.
       ASSIGN COMPONENT field_info-fieldname OF STRUCTURE i_structure TO FIELD-SYMBOL(<field>).
       CHECK <field> IS ASSIGNED AND
             <field> IS NOT INITIAL.
-*            AND field_info-seltext NE |INDEX|.
 
       current_context = COND #( WHEN field_info-datatype EQ 'TTYP' THEN me->add_itab(   i_current_context = current_context
                                                                                         i_table           = <field>

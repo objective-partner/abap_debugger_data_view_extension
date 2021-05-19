@@ -17,46 +17,56 @@ CLASS zcl_op_value_pretty_printer DEFINITION
              char(1)   TYPE c,
            END OF t_char_offset,
            tt_char_offset TYPE STANDARD TABLE OF t_char_offset WITH DEFAULT KEY,
-           BEGIN OF ENUM enum_terminal STRUCTURE c_terminal,
-             assign,
-             rhs,
-             empty,
-             struct,
-             struct2,
-             iteration,
-             table,
-             rhs2,
-             symbolname,
-             number,
-             non_terminal,
-             text_literal,
-             string_literal,
-             spaces,
-           END OF ENUM enum_terminal STRUCTURE c_terminal,
-           BEGIN OF ENUM enum_sub_terminal STRUCTURE c_sub_terminal,
-             na,                    " not applicable
-             assign_operator,       " =
-             value_operator,        " VALUE #(
-             parenthesis_open,      " (
-             parenthesis_close,     " )
-             empty_line,            " ( )
-             end_of_statement,      " .
-           END OF ENUM enum_sub_terminal STRUCTURE c_sub_terminal,
-           BEGIN OF ty_trace,
-             parent_sync_point TYPE i,
-             terminal          TYPE enum_terminal,
-             sub_terminal      TYPE enum_sub_terminal,
-             offset            TYPE i,
-             length            TYPE i,
-             sync_point        TYPE i,
-             text              TYPE string,
-           END OF ty_trace,
-           BEGIN OF ty_sync_point,
-             terminal     TYPE enum_terminal,
-             sub_terminal TYPE enum_sub_terminal,
-             offset       TYPE i,
-             trace_index  TYPE i,
-           END OF ty_sync_point.
+
+           t_terminal     TYPE i,
+           t_sub_terminal TYPE i.
+
+
+    CONSTANTS: BEGIN OF c_terminal,
+                 assign         TYPE t_terminal VALUE 0,
+                 rhs            TYPE t_terminal VALUE 1,
+                 empty          TYPE t_terminal VALUE 2,
+                 struct         TYPE t_terminal VALUE 3,
+                 struct2        TYPE t_terminal VALUE 4,
+                 iteration      TYPE t_terminal VALUE 5,
+                 table          TYPE t_terminal VALUE 6,
+                 rhs2           TYPE t_terminal VALUE 7,
+                 symbolname     TYPE t_terminal VALUE 8,
+                 number         TYPE t_terminal VALUE 9,
+                 non_terminal   TYPE t_terminal VALUE 10,
+                 text_literal   TYPE t_terminal VALUE 11,
+                 string_literal TYPE t_terminal VALUE 12,
+                 spaces         TYPE t_terminal VALUE 13,
+               END OF c_terminal,
+
+               BEGIN OF c_sub_terminal,
+                 na                TYPE t_sub_terminal VALUE 0,
+                 assign_operator   TYPE t_sub_terminal VALUE 1,
+                 value_operator    TYPE t_sub_terminal VALUE 2,
+                 parenthesis_open  TYPE t_sub_terminal VALUE 3,
+                 parenthesis_close TYPE t_sub_terminal VALUE 4,
+                 empty_line        TYPE t_sub_terminal VALUE 5,
+                 end_of_statement  TYPE t_sub_terminal VALUE 6,
+               END OF c_sub_terminal.
+
+    TYPES:        BEGIN OF ty_trace,
+                    parent_sync_point TYPE i,
+                    terminal          TYPE t_terminal,
+                    sub_terminal      TYPE t_sub_terminal,
+                    offset            TYPE i,
+                    length            TYPE i,
+                    sync_point        TYPE i,
+                    text              TYPE string,
+                  END OF ty_trace,
+
+                  BEGIN OF ty_sync_point,
+                    terminal     TYPE t_terminal,
+                    sub_terminal TYPE t_sub_terminal,
+                    offset       TYPE i,
+                    trace_index  TYPE i,
+                  END OF ty_sync_point.
+
+
     DATA: steering    TYPE tt_char_offset,
           offset      TYPE i,
           text        TYPE string,
@@ -113,7 +123,7 @@ CLASS zcl_op_value_pretty_printer DEFINITION
           lcx_no_match,
       non_terminal
         IMPORTING
-          sub_terminal TYPE enum_sub_terminal
+          sub_terminal TYPE t_sub_terminal
           regex        TYPE csequence
 *        PREFERRED PARAMETER
         RAISING
@@ -132,8 +142,8 @@ CLASS zcl_op_value_pretty_printer DEFINITION
       add_to_trace,
       set_sync_point
         IMPORTING
-          i_terminal        TYPE enum_terminal
-          i_sub_terminal    TYPE enum_sub_terminal DEFAULT c_sub_terminal-na
+          i_terminal        TYPE t_terminal
+          i_sub_terminal    TYPE t_sub_terminal DEFAULT c_sub_terminal-na
         RETURNING
           VALUE(sync_point) TYPE i,
       reset_to_sync_point
@@ -479,7 +489,7 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
     IF offset >= strlen( text ).
       RAISE EXCEPTION TYPE lcx_no_match.
     ENDIF.
-    data(regex2) = '^' && regex.
+    DATA(regex2) = '^' && regex.
     FIND FIRST OCCURRENCE OF REGEX regex2 IN text+offset MATCH LENGTH DATA(length).
     IF sy-subrc = 0.
       offset = offset + length.
@@ -574,9 +584,9 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
 
     DELETE sync_points INDEX lines( sync_points ).
 
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
+    IF 0 = 1.
+      RAISE EXCEPTION TYPE lcx_parser_interrupt.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -592,9 +602,9 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
 
     sync_point = lines( sync_points ).
 
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
+    IF 0 = 1.
+      RAISE EXCEPTION TYPE lcx_parser_interrupt.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -605,9 +615,9 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
     offset = sync_points[ sync_point ]-offset.
     DELETE sync_points FROM sync_point.
 
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
+    IF 0 = 1.
+      RAISE EXCEPTION TYPE lcx_parser_interrupt.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -617,9 +627,9 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
     DELETE trace_tab FROM sync_points[ sync_point ]-trace_index + 1.
     DELETE sync_points FROM sync_point.
 
-    if 0 = 1.
-      raise EXCEPTION type lcx_parser_interrupt.
-    endif.
+    IF 0 = 1.
+      RAISE EXCEPTION TYPE lcx_parser_interrupt.
+    ENDIF.
 
   ENDMETHOD.
 

@@ -37,29 +37,26 @@ ENDCLASS.
 CLASS zcl_op_component IMPLEMENTATION.
 
 
-  METHOD add.
+METHOD add.
     DATA type TYPE REF TO cl_abap_typedescr.
 
     r_current_context = i_current_context.
 
-    CHECK i_component IS NOT INITIAL. "AND i_component_info-fieldname NE |INDEX|.
+    CHECK i_component IS NOT INITIAL.
 
-*    DATA(assign_component_value) = COND #(
-*                WHEN i_component_info-datatype EQ |TTYP| THEN | = { i_component }|
-*                WHEN i_component_info-datatype EQ |STRU| THEN |{ i_component }|
-*                ELSE | = '{ i_component }'| ).
+    type = cl_abap_typedescr=>describe_by_data( i_component ).
+
     DATA(assign_component_value) = SWITCH #( i_component_info-inttype
                 WHEN type->typekind_int1
                   OR type->typekind_int2
                   OR type->typekind_int
-                  OR type->typekind_int8
-                THEN condense( |{ i_component }| )
+                        THEN condense( |{ i_component }| )
                 WHEN type->typekind_struct1
                   OR type->typekind_struct2
                   OR type->typekind_table
-                THEN i_component
+                        THEN i_component
                 WHEN type->typekind_string
-                THEN |`{ replace( val = i_component sub = |`| with = |``| occ = 0 ) }`|
+                        THEN |`{ replace( val = i_component sub = |`| with = |``| occ = 0 ) }`|
                 ELSE |'{ replace( val = i_component sub = |'| with = |''| occ = 0 ) }'| ).
 
     IF i_component_info-fieldname IS NOT INITIAL.
