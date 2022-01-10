@@ -143,7 +143,7 @@ CLASS ltcl_fieldcatalog_should IMPLEMENTATION.
 
     data(lt_field_catalog_act)
         = lo_cut->get_fieldcat_from_local_type(
-            i_structure_description
+            i_rtti
                 = cast cl_abap_structdescr( cl_abap_structdescr=>describe_by_data( p_data = ls_struct ) )
         ).
 
