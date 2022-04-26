@@ -154,7 +154,6 @@ CLASS ltc_table_enh_should IMPLEMENTATION.
         number_of_rows                 = '11.5'
         object                         = 'OBJECT'
         statement_with_values          = `STATEMENT_WITH_VALUES`
-        cursor                         = 'CURSOR'
         array_size                     = 12
         transaction                    = 'TRANSACTION'
         program                        = 'PROGRAM'
@@ -185,7 +184,7 @@ CLASS ltc_table_enh_should IMPLEMENTATION.
                                                i_table_title = 'TABLE' ).
 
     DATA(output_exp) = |TABLE = VALUE #( ( DATE = '{ lv_date }' TIME = '{ lv_time }' DURATION = '11 ' NUMBER_OF_ROWS = 12 |
-                        && |OBJECT = 'OBJECT' STATEMENT_WITH_VALUES = `STATEMENT_WITH_VALUES` CURSOR = 'CURS' |
+                        && |OBJECT = 'OBJECT' STATEMENT_WITH_VALUES = `STATEMENT_WITH_VALUES` |
                         && |ARRAY_SIZE = 12 TRANSACTION = 'TRANSACTION' PROGRAM = 'PROGRAM' DB_CONNECTION_NAME = |
                         && |'DB_CONNECTION_NAME' DB_CONNECTION_ID = 'DB_CON_ID' OPERATION = 'OPERATI' RETURN_CODE |
                         && |= 13 WP_ID = '001' WP_TYPE = 'DIA' USER_NAME = 'USER_NAME' CLIENT = '100' TRANS_ID = |
