@@ -10,10 +10,11 @@ CLASS ltcl_pretty_printer_should DEFINITION FINAL FOR TESTING
     DATA: cut TYPE REF TO zcl_op_value_pretty_printer.
     METHODS:
       setup,
-      add_indent FOR TESTING RAISING cx_static_check,
-      table_of_integers FOR TESTING RAISING cx_static_check,
-      table_in_structure FOR TESTING RAISING cx_static_check,
-      performance FOR TESTING RAISING cx_static_check.
+      add_indent FOR TESTING,
+      table_of_integers FOR TESTING,
+      table_in_structure FOR TESTING,
+      performance FOR TESTING,
+      accept_arrow_in_lhs FOR TESTING.
 ENDCLASS.
 
 CLASS ltcl_pretty_printer_performanc DEFINITION FINAL FOR TESTING
@@ -127,6 +128,23 @@ CLASS ltcl_pretty_printer_should IMPLEMENTATION.
 
     "THEN
     "method should take less than DURATION SHORT
+
+  ENDMETHOD.
+
+  METHOD accept_arrow_in_lhs.
+    "GIVEN
+    DATA(input) = |CUT->ST03N_TRANSACTION_PROFILE = VALUE #( ( MANDT = '800' DATE = '20210130' TCODE = '/IWBEP/R_CLEAN_UP_QRL'  ) ).|.
+
+    "WHEN
+    DATA(formated_string) = cut->format( input ).
+
+
+    "THEN
+    cl_abap_unit_assert=>assert_equals(
+      EXPORTING
+        act    = formated_string
+        exp    = |CUT->ST03N_TRANSACTION_PROFILE = VALUE #(\n         (\n                 MANDT = '800'\n                 DATE = '20210130'\n                 TCODE = '/IWBEP/R_CLEAN_UP_QRL'\n                  )\n         ).|
+        msg    = |Could not format input|  ).
 
   ENDMETHOD.
 
