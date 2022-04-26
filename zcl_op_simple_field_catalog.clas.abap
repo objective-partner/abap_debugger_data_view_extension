@@ -14,7 +14,8 @@ CLASS zcl_op_simple_field_catalog DEFINITION
         IMPORTING i_reference_to_data    TYPE REF TO data
         RETURNING VALUE(r_field_catalog) TYPE lvc_t_fcat,
       "! get field_catalog by given data
-      "! @parameter i_reference_to_data | current given data
+      "! @parameter i_table | any table
+      "! @parameter i_structure | any structure
       "! @parameter r_field_catalog     | field catalog of current data
       get_by_data
         IMPORTING i_table                TYPE ANY TABLE OPTIONAL
@@ -24,32 +25,23 @@ CLASS zcl_op_simple_field_catalog DEFINITION
   PRIVATE SECTION.
     METHODS:
       get_fieldcatalog_from_ddic
-        IMPORTING
-          i_rtti                 TYPE REF TO cl_abap_typedescr
-*          i_structure_description TYPE REF TO cl_abap_structdescr
-        RETURNING
-          VALUE(r_field_catalog) TYPE lvc_t_fcat,
+        IMPORTING          i_rtti                 TYPE REF TO cl_abap_typedescr
+        RETURNING          VALUE(r_field_catalog) TYPE lvc_t_fcat,
       get_fieldcat_from_local_type
-        IMPORTING
-          i_rtti                 TYPE REF TO cl_abap_typedescr
-*          i_structure_description TYPE REF TO cl_abap_structdescr
-        RETURNING
-          VALUE(r_field_catalog) TYPE lvc_t_fcat,
+        IMPORTING          i_rtti                 TYPE REF TO cl_abap_typedescr
+        RETURNING          VALUE(r_field_catalog) TYPE lvc_t_fcat,
       transform
         CHANGING
           !c_ddic_fields TYPE ddfields OPTIONAL
           !c_ddic_field  TYPE dfies OPTIONAL,
       map_to_field_catalog
-        IMPORTING
-          i_ddic_fields          TYPE ddfields
-        RETURNING
-          VALUE(r_field_catalog) TYPE lvc_t_fcat,
+        IMPORTING          i_ddic_fields          TYPE ddfields
+        RETURNING          VALUE(r_field_catalog) TYPE lvc_t_fcat,
       get_reference_to_data
         IMPORTING
           i_table       TYPE ANY TABLE
           i_structure   TYPE any
-        RETURNING
-          VALUE(r_data) TYPE REF TO data,
+        RETURNING          VALUE(r_data) TYPE REF TO data,
       get_fieldcatalog_via_reference
         IMPORTING i_reference_to_data    TYPE REF TO data
         RETURNING VALUE(r_field_catalog) TYPE lvc_t_fcat.

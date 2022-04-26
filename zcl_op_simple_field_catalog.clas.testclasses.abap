@@ -1,19 +1,19 @@
 *"* use this source file for your ABAP unit test classes
 CLASS ltcl_fieldcatalog_should DEFINITION DEFERRED.
-CLASS ZCL_OP_SIMPLE_FIELD_CATALOG DEFINITION LOCAL FRIENDS ltcl_fieldcatalog_should.
+CLASS zcl_op_simple_field_catalog DEFINITION LOCAL FRIENDS ltcl_fieldcatalog_should.
 CLASS ltcl_fieldcatalog_should DEFINITION FINAL FOR TESTING
   DURATION SHORT
   RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
 
-    DATA: lo_cut TYPE REF TO ZCL_OP_SIMPLE_FIELD_CATALOG.
+    DATA: lo_cut TYPE REF TO zcl_op_simple_field_catalog.
     METHODS:
       setup,
       get_fields_in_right_order         FOR TESTING RAISING cx_static_check,
       get_fieldcatalog_of_local_type    FOR TESTING RAISING cx_static_check,
       get_fieldcatalog_nostruc_table    FOR TESTING RAISING cx_static_check,
-      get_fieldcat_of_local_typ_incl    for testing raising cx_static_check.
+      get_fieldcat_of_local_typ_incl    FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -73,7 +73,7 @@ CLASS ltcl_fieldcatalog_should IMPLEMENTATION.
 
 
   METHOD setup.
-    lo_cut = NEW ZCL_OP_SIMPLE_FIELD_CATALOG( ).
+    lo_cut = NEW zcl_op_simple_field_catalog( ).
   ENDMETHOD.
 
 
@@ -125,29 +125,26 @@ CLASS ltcl_fieldcatalog_should IMPLEMENTATION.
 
   ENDMETHOD.
 
-  method get_fieldcat_of_local_typ_incl.
+  METHOD get_fieldcat_of_local_typ_incl.
 
-    types begin of gtyp_struct.
-    include type t000.
-    types dummy_field_1 type i.
-    types dummy_field_2 type string.
-    types end of gtyp_struct .
+    TYPES BEGIN OF gtyp_struct.
+    INCLUDE TYPE t000.
+    TYPES dummy_field_1 TYPE i.
+    TYPES dummy_field_2 TYPE string.
+    TYPES END OF gtyp_struct .
 
-    data(ls_struct)
-        = value gtyp_struct(
+    DATA(ls_struct)
+        = VALUE gtyp_struct(
             mandt         = '000'
             logsys        = 'DUMMY_1'
             dummy_field_1 = 666
             dummy_field_2 = 'Hello'
         ).
 
-    data(lt_field_catalog_act)
-        = lo_cut->get_fieldcat_from_local_type(
-            i_rtti
-                = cast cl_abap_structdescr( cl_abap_structdescr=>describe_by_data( p_data = ls_struct ) )
-        ).
+    DATA(lt_field_catalog_act) = lo_cut->get_fieldcat_from_local_type( i_rtti  = CAST cl_abap_structdescr( cl_abap_structdescr=>describe_by_data( p_data = ls_struct ) ) ).
 
-    data(lt_field_catalog_exp) = value lvc_t_fcat(
+
+    DATA(lt_field_catalog_exp) = VALUE lvc_t_fcat(
                        (
                         fieldname = 'MANDT'
                         outputlen = '000003'
@@ -265,19 +262,10 @@ CLASS ltcl_fieldcatalog_should IMPLEMENTATION.
                        ).
 
 
-    cl_abap_unit_assert=>assert_equals(
-      exporting
-        act                  = lt_field_catalog_act
-        exp                  = lt_field_catalog_exp
-*    ignore_hash_sequence = abap_false
-*    tol                  =
-*    msg                  =
-*    level                = if_abap_unit_constant=>severity-medium
-*    quit                 = if_abap_unit_constant=>quit-test
-*  receiving
-*    assertion_failed     =
-    ).
+    cl_abap_unit_assert=>assert_equals(   act  = lt_field_catalog_act
+                                          exp  = lt_field_catalog_exp
+                                          msg  = |Fieldcatalogue could not be retrieverd for local type with include|  ).
 
-  endmethod.
+  ENDMETHOD.
 
 ENDCLASS.

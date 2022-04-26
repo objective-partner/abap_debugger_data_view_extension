@@ -167,7 +167,7 @@ CLASS ltc_struc_enh_should_process IMPLEMENTATION.
 
   METHOD include_in_structure.
     TYPES BEGIN OF t_struct.
-            INCLUDE TYPE t000.
+    INCLUDE TYPE t000.
     TYPES dummy_field_1 TYPE i.
     TYPES dummy_field_2 TYPE string.
     TYPES END OF t_struct.
