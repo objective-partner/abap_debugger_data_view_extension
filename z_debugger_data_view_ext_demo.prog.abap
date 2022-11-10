@@ -12,11 +12,12 @@ DATA:
     carrid TYPE sflights-carrid,          " this table contains
     connid TYPE sflights-connid,          " the key information
     fldate TYPE sflights-fldate,          " of the hit list
-  END OF flights_with_header.
+  END OF flights_with_header,
+  flights_hashed TYPE HASHED TABLE OF sflight WITH UNIQUE KEY mandt carrid connid fldate.
 
 "for obsolete tables with header
 
-flights_with_header[] = value #( ( carrid = 'AA' connid = '0017' fldate = '20141217' )
+flights_with_header[] = VALUE #( ( carrid = 'AA' connid = '0017' fldate = '20141217' )
                                  ( carrid = 'AB' connid = '0017' fldate = '20150225' )
                                  ( carrid = 'AC' connid = '0017' fldate = '20150225' )
 
@@ -45,6 +46,8 @@ lt_flights = VALUE #(
                      )
                     ).
 
+" for testing filtered view
+INSERT LINES OF lt_flights INTO TABLE flights_hashed.
 
 "for testing structure enhancement
 ls_flight = VALUE #( mandt = '100' carrid = 'AA' connid = '0017' fldate = '20141217'
