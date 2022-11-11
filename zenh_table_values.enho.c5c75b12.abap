@@ -8,16 +8,16 @@ ENHANCEMENT 0 ZENH_TABLE_VALUES.
           TRY.
               DATA(zz_reference_to_data) = NEW zcl_op_debugger_integration( )->get_ref_to_any_content( i_variable_name = me->table ).
               ASSIGN zz_reference_to_data->* TO <zz_table>. "de-referencing
-              DATA(zz_field_catalog) = NEW zcl_op_simple_field_catalog( )->get_by_reference( zz_reference_to_data ).
             CATCH cx_root INTO DATA(lx_root).
               "could be a header table, lets try another method
               ASSIGN me->rda_table->* TO <zz_table>. "get current table content
-              zz_field_catalog = me->tab_fcat.
           ENDTRY.
 
           DATA(zz_filtered_table) = mo_cust_rec->filter_table_from_alv( i_alv = ref_alv
                                                                         i_table = <zz_table> ).
           ASSIGN zz_filtered_table->* TO <zz_table>.
+
+          ref_alv->get_frontend_fieldcatalog( IMPORTING et_fieldcatalog = DATA(zz_field_catalog) ).
 
           mo_cust_rec->show_popup_w_content(
               EXPORTING

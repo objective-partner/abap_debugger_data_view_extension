@@ -78,7 +78,8 @@ CLASS zcl_op_table IMPLEMENTATION.
                                                i_component_name  = i_component_name
                                                i_tabix           = line_num ).
           "print columns
-          LOOP AT field_catalog INTO DATA(field_info).
+          LOOP AT field_catalog INTO DATA(field_info)
+          WHERE no_out = abap_false.
             IF lines( field_catalog ) = 1 AND field_catalog[ 1 ]-fieldname IS INITIAL.
               ASSIGN <table_line> TO FIELD-SYMBOL(<field>).
             ELSE.
