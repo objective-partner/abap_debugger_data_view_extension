@@ -49,7 +49,7 @@
         "ambiguous_statement": false,
         "begin_end_names": false,
         "check_transformation_exists": false,
-        "check_syntax": false,
+        "check_syntax": true,
         "form_tables_obsolete": false,
         "tabl_enhancement_category": false,
         "implement_methods": false,
