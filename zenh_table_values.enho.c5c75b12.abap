@@ -6,6 +6,8 @@ ENHANCEMENT 0 ZENH_TABLE_VALUES.
       zcl_op_debugger_integration=>debug_debugger_if_needed( ).
       TRY.
           ref_alv->get_frontend_fieldcatalog( IMPORTING et_fieldcatalog = DATA(zz_field_catalog) ).
+          " field INDEX does not actually exist in table and is not useful in VALUE statement
+          DELETE zz_field_catalog WHERE fieldname = 'INDEX'.
           ASSIGN me->rda_table->* TO <zz_table>. "get current table content
           DATA(zz_filtered_table) = mo_cust_rec->filter_table_from_alv( i_alv = ref_alv
                                                                         i_table = <zz_table> ).
