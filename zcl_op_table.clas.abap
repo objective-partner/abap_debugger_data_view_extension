@@ -26,7 +26,11 @@ CLASS zcl_op_table DEFINITION
                   i_component_name         TYPE lvc_fname  OPTIONAL
                   i_fieldcatalog           TYPE lvc_t_fcat OPTIONAL
                   i_dont_add_a_point       TYPE boole_d    OPTIONAL
-        RETURNING VALUE(r_current_context) TYPE string.
+        RETURNING VALUE(r_current_context) TYPE string,
+      filter_table_from_alv
+        IMPORTING i_alv         TYPE REF TO cl_gui_alv_grid OPTIONAL
+                  i_table       TYPE ANY TABLE
+        RETURNING VALUE(result) TYPE REF TO data.
 
   PRIVATE SECTION.
     METHODS:
@@ -74,7 +78,8 @@ CLASS zcl_op_table IMPLEMENTATION.
                                                i_component_name  = i_component_name
                                                i_tabix           = line_num ).
           "print columns
-          LOOP AT field_catalog INTO DATA(field_info).
+          LOOP AT field_catalog INTO DATA(field_info)
+          WHERE no_out = abap_false.
             IF lines( field_catalog ) = 1 AND field_catalog[ 1 ]-fieldname IS INITIAL.
               ASSIGN <table_line> TO FIELD-SYMBOL(<field>).
             ELSE.
@@ -174,7 +179,7 @@ CLASS zcl_op_table IMPLEMENTATION.
     TRY.
         DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
       CATCH  cx_class_not_existent INTO DATA(cx_class_not_existent).
-        "formating went wring, fallback using non formated text
+        "formating went wrong, fallback using non formated text
         formated_content = content_4_display.
     ENDTRY.
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
@@ -182,4 +187,27 @@ CLASS zcl_op_table IMPLEMENTATION.
     cl_demo_output=>display( ).
 
   ENDMETHOD.
+
+
+  METHOD filter_table_from_alv.
+    FIELD-SYMBOLS <filtered_table> TYPE table.
+    " create local copy of table for filtering
+    CREATE DATA result LIKE i_table.
+    ASSIGN result->* TO <filtered_table>.
+    <filtered_table> = i_table.
+
+    IF i_alv IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
+    i_alv->get_filtered_entries( IMPORTING et_filtered_entries = DATA(filtered_entries) ).
+    DATA filtered_entries_std TYPE TABLE OF i.
+    filtered_entries_std = filtered_entries.
+    " sort descending so deletion of entries doesn't mess up the table indices
+    SORT filtered_entries_std BY table_line DESCENDING.
+    LOOP AT filtered_entries_std ASSIGNING FIELD-SYMBOL(<i>).
+      DELETE <filtered_table> INDEX <i>.
+    ENDLOOP.
+  ENDMETHOD.
+
 ENDCLASS.
