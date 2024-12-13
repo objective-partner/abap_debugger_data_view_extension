@@ -217,8 +217,15 @@ CLASS zcl_op_structure IMPLEMENTATION.
     TRY.
         DATA(formated_content) =  zcl_op_pretty_printer_factory=>create( )->format( content_4_display ).
       CATCH  cx_class_not_existent INTO DATA(cx_class_not_existent).
-        "formating went wring, fallback using non formated text
+        "formating went wrong, fallback using non formated text
         formated_content = content_4_display.
+      CATCH  zcx_op_dve INTO DATA(zcx_op_dve).
+        "formating went wrong, fallback using non formated text
+        DATA(unformated_content) = content_4_display.
+        cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
+        cl_demo_output=>write_data( unformated_content ).
+        cl_demo_output=>display( ).
+        RETURN.
     ENDTRY.
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). "set to text mode to be more compatible with minus signs and so on
     cl_demo_output=>write_data( formated_content ).
