@@ -123,3 +123,9 @@ DATA(ls_col2) = nested_struc-col2.
 
 "do something with itab
 DATA(ls_col1) = nested_itab[ 1 ]-col1.
+
+"field symbol
+ASSIGN lt_flights TO FIELD-SYMBOL(<flights>).
+
+"dummy line to add your break-point before the end of the program
+ASSERT 1 = 1.

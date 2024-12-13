@@ -557,6 +557,9 @@ CLASS zcl_op_value_pretty_printer IMPLEMENTATION.
 
     ENDLOOP.
 
+    IF lx_error IS BOUND.
+      RAISE EXCEPTION TYPE zcx_op_dve EXPORTING previous = lx_error.
+    ENDIF.
   ENDMETHOD.
 
 

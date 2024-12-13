@@ -10,6 +10,7 @@ INTERFACE zif_op_value_pretty_printer
     "! @parameter r_formated_content | formated value #() construct containing line breaks, spaces and so on
     format
       IMPORTING i_unformated_value_content TYPE string
-      RETURNING VALUE(r_formated_content)  TYPE string.
+      RETURNING VALUE(r_formated_content)  TYPE string
+      RAISING   zcx_op_dve.
 
 ENDINTERFACE.
