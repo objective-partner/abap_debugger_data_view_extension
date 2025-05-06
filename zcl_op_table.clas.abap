@@ -146,7 +146,7 @@ CLASS zcl_op_table IMPLEMENTATION.
                                       WHEN plain_content IS NOT INITIAL    THEN plain_content ).
 
     cl_demo_output=>set_mode( cl_demo_output=>text_mode ). " set to text mode to be more compatible with minus signs and so on
-    cl_demo_output=>write_data( content_4_display ).
+    cl_demo_output=>write_text( content_4_display ).
     cl_demo_output=>display( ).
   ENDMETHOD.
 
