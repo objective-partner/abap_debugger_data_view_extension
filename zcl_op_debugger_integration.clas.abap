@@ -93,7 +93,7 @@ CLASS ZCL_OP_DEBUGGER_INTEGRATION IMPLEMENTATION.
 
   METHOD debug_debugger_if_needed.
 
-    IF sy-datum = '20210213' AND sy-uname = 'DEVELOPER'.
+    IF sy-datum = '20240608' AND sy-uname = 'A.GEPPART'.
       BREAK-POINT ##NEEDED.
     ENDIF.
 

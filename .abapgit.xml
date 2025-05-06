@@ -15,6 +15,7 @@
     <item>/zop_aunit_ext_demo.prog.abap</item>
     <item>/zop_aunit_ext_demo.prog.xml</item>
     <item>/zop_custom_event_rec.clas.testclasses.abap</item>
+    <item>/abaplint.json</item>
    </IGNORE>
   </DATA>
  </asx:values>
